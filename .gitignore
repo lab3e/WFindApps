@@ -1,0 +1,37 @@
+# Build output
+x64/
+Win32/
+bin/
+obj/
+
+# Visual Studio IDE files
+.vs/
+*.sdf
+*.suo
+*.user
+*.aps
+*.ncb
+*.opensdf
+ipch/
+
+# Compiled output
+*.exe
+*.dll
+*.pdb
+*.ilk
+*.exp
+*.lib
+
+# Precompiled headers
+*.pch
+
+# Intermediate files
+*.obj
+*.tlog
+*.iobj
+*.ipdb
+*.lastbuildstate
+*.unsuccessfulbuild
+
+# Log files
+*.log

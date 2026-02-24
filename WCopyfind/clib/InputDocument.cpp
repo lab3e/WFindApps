@@ -908,11 +908,15 @@ int CInputDocument::OpenDoc(wchar_t* filename)
 		{
 			if (chunk.flags & CHUNK_TEXT)
 			{
+				HRESULT thr;
 				ULONG count = 4096;
-				while (SUCCEEDED(pFilter->GetText(&count, buf)))
+				while (true)
 				{
+					thr = pFilter->GetText(&count, buf);
+					if (!SUCCEEDED(thr)) break;
 					m_docTextBuffer.append(buf, count);
 					m_docTextBuffer += L' ';
+					if (thr != S_OK) break; // FILTER_S_LAST_TEXT: stop before spurious next call
 					count = 4096;
 				}
 			}

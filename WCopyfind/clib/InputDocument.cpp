@@ -628,7 +628,9 @@ int CInputDocument::GetWord(wchar_t *word,int &DelimiterType)
 			
 			if(m_char == 0) m_char=fgetc(m_filep); // skip a single null character (but not multiple nulls)
 			
-			if(m_char >= 0x80)	// convert extended ISO8559-1 characters into appropriate unicode characters
+			// Convert Windows-1252 extended bytes to Unicode before processing;
+			// must be a separate step so the converted character is handled by the chain below.
+			if(m_char >= 0x80 && m_char <= 0xFF)
 			{
 				switch( m_char )
 				{
@@ -666,7 +668,7 @@ int CInputDocument::GetWord(wchar_t *word,int &DelimiterType)
 				case 159: m_char = 376; break;
 				}
 			}
-			else if(m_char < 0) // check for EOF encountered
+			if(m_char < 0) // check for EOF encountered
 			{
 				word[wordLength]=0; // finish the word off
 				DelimiterType = DEL_TYPE_EOF;

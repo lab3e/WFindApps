@@ -187,7 +187,6 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
     <None Include="res\toolbar1.bmp" />
     <None Include="res\WCopyfind.ico" />
     <None Include="res\WCopyfind.rc2" />

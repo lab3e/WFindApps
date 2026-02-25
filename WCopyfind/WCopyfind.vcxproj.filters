@@ -15,7 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
     <None Include="res\WCopyfind.rc2">
       <Filter>Resource Files</Filter>
     </None>
@@ -51,36 +50,6 @@
     <ClInclude Include="AbortDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="zlib\crc32.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib\inffast.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib\inffixed.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib\inflate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib\inftrees.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib\ioapi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib\unzip.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib\zconf.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib\zlib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib\zutil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="clib\CompareDocuments.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -93,8 +62,20 @@
     <ClInclude Include="clib\Words.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="zlib\crypt.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="miniz\miniz.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="miniz\miniz_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="miniz\miniz_tdef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="miniz\miniz_tinfl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="miniz\miniz_zip.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -116,30 +97,6 @@
     <ClCompile Include="AbortDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="zlib\adler32.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="zlib\crc32.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="zlib\inffast.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="zlib\inflate.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="zlib\inftrees.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="zlib\ioapi.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="zlib\unzip.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="zlib\zutil.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="clib\CompareDocuments.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -150,6 +107,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="clib\Words.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="miniz\miniz.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="miniz\miniz_tdef.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="miniz\miniz_tinfl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="miniz\miniz_zip.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

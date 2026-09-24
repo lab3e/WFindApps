@@ -1,1292 +1,1236 @@
-
-// WCopyfindDlg.cpp : implementation file
-//
+// WCopyfindDlg.cpp : the main WCopyfind window
 
 #include "stdafx.h"
 #include <afxinet.h>
-#include "afxdialogex.h"
-#include "afxwin.h"
-#include <stdlib.h>
-#include <atlbase.h>
-#include <atlstr.h>
+#include <shlobj.h>
+#include <shlwapi.h>
+#include <locale.h>
+#include <algorithm>
 #include <string>
-#include <unordered_map>
-#include <vector>
 #include "InputDocument.h"
-#include "Words.h"
-#include "clib\CompareDocuments.h"
-#include "UiThread.h"
 #include "WCopyfind.h"
 #include "WCopyfindDlg.h"
-#include "AbortDlg.h"
+#include "OptionsDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-
-// CAboutDlg dialog used for App About
+// ---------------------------------------------------------------------------------------------------------
+// About box
 
 class CAboutDlg : public CDialogEx
 {
 public:
-	CAboutDlg();
+	CAboutDlg() : CDialogEx(IDD_ABOUTBOX) {}
 
-// Dialog Data
-	enum { IDD = IDD_ABOUTBOX };
-
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-// Implementation
 protected:
-	DECLARE_MESSAGE_MAP()
-public:
 	virtual BOOL OnInitDialog();
-	CEdit m_Edit_About;
+	afx_msg void OnLinkClick(NMHDR* pNMHDR, LRESULT* pResult);
+	DECLARE_MESSAGE_MAP()
 };
 
-CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
-{
-}
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
-	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_EDIT_ABOUT, m_Edit_About);
-}
-
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+	ON_NOTIFY(NM_CLICK, IDC_LINK_WEB, OnLinkClick)
+	ON_NOTIFY(NM_RETURN, IDC_LINK_WEB, OnLinkClick)
 END_MESSAGE_MAP()
 
+BOOL CAboutDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+	SetDlgItemText(IDC_STATIC_VERSION, WCOPYFIND_NAME);
+	SetDlgItemText(IDC_EDIT_ABOUT,
+		L"WCopyfind finds the phrases that documents share. It was written to detect plagiarism in student papers "
+		L"and has since been used for many other kinds of comparisons.\r\n\r\n"
+		L"This program is free software; you can redistribute it and/or modify it under the terms of the GNU General "
+		L"Public License as published by the Free Software Foundation; either version 2 of the License, or (at your "
+		L"option) any later version.\r\n\r\n"
+		L"This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the "
+		L"implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License "
+		L"for more details: https://www.gnu.org/licenses/\r\n\r\n"
+		L"If you significantly improve this program, please let me know through the web site.\r\n\r\n"
+		L"WCopyfind reads .docx files with miniz, by Rich Geldreich and contributors (MIT License).");
+	return TRUE;
+}
 
-// CWCopyfindDlg dialog
+void CAboutDlg::OnLinkClick(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	PNMLINK link = reinterpret_cast<PNMLINK>(pNMHDR);
+	ShellExecuteW(m_hWnd, L"open", link->item.szUrl, nullptr, nullptr, SW_SHOWNORMAL);
+	*pResult = 0;
+}
 
-CWCopyfindDlg::CWCopyfindDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(CWCopyfindDlg::IDD, pParent)
-	, m_ptMsg(0)
-	, m_szMsg(_T(""))
-	, m_Menu(0)
-	, m_Sort_On_Load_New(false)
-	, m_Sort_On_Load_Old(false)
-	, m_pAbortDlg(NULL)
-	, m_pUiThread(NULL)
-	, m_pargs(NULL)
+// ---------------------------------------------------------------------------------------------------------
+// Helpers
+
+static CString FileName(const CString& path) { return PathFindFileNameW(path); }
+
+static CString FolderName(const CString& path)
+{
+	CString folder = path;
+	PathRemoveFileSpecW(folder.GetBuffer());
+	folder.ReleaseBuffer();
+	return folder;
+}
+
+static bool NaturalLess(const CString& a, const CString& b)		// by file name ("paper2" before "paper10"), then folder
+{
+	int c = StrCmpLogicalW(FileName(a), FileName(b));
+	if(c != 0) return c < 0;
+	return StrCmpLogicalW(a, b) < 0;
+}
+
+static CString ResolveShortcut(const CString& path)
+{
+	if(_wcsicmp(PathFindExtensionW(path), L".lnk") != 0) return path;
+	CString target = path;
+	IShellLinkW* link = nullptr;
+	if(SUCCEEDED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void**)&link)))
+	{
+		IPersistFile* file = nullptr;
+		if(SUCCEEDED(link->QueryInterface(IID_IPersistFile, (void**)&file)))
+		{
+			wchar_t resolved[MAX_PATH] = {0};
+			if(SUCCEEDED(file->Load(path, STGM_READ)) && SUCCEEDED(link->GetPath(resolved, MAX_PATH, nullptr, 0)) && resolved[0])
+				target = resolved;
+			file->Release();
+		}
+		link->Release();
+	}
+	return target;
+}
+
+static void CollectFolder(const CString& folder, std::vector<CString>& files)	// documents in a folder and its subfolders
+{
+	CFileFind finder;
+	BOOL more = finder.FindFile(folder + L"\\*.*");
+	while(more)
+	{
+		more = finder.FindNextFile();
+		if(finder.IsDots()) continue;
+		if(finder.IsDirectory()) CollectFolder(finder.GetFilePath(), files);
+		else if(CWCopyfindApp::IsDocumentType(finder.GetFilePath())) files.push_back(finder.GetFilePath());
+	}
+}
+
+static std::vector<CString> ReadListFile(const CString& path)		// a saved document list, in any common encoding
+{
+	std::vector<CString> lines;
+	FILE* file = nullptr;
+	if(_wfopen_s(&file, path, L"rb") != 0 || file == nullptr) return lines;
+	std::string bytes;
+	char buffer[65536];
+	size_t n;
+	while((n = fread(buffer, 1, sizeof(buffer), file)) > 0) bytes.append(buffer, n);
+	fclose(file);
+
+	CString text;
+	if(bytes.size() >= 2 && (unsigned char)bytes[0] == 0xFF && (unsigned char)bytes[1] == 0xFE)
+		text = CString(reinterpret_cast<const wchar_t*>(bytes.data() + 2), (int)(bytes.size() - 2) / 2);
+	else
+	{
+		size_t start = (bytes.size() >= 3 && bytes.compare(0, 3, "\xEF\xBB\xBF") == 0) ? 3 : 0;
+		const char* data = bytes.data() + start;
+		int length = (int)(bytes.size() - start);
+		UINT codePage = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, data, length, nullptr, 0) > 0 || length == 0 ? CP_UTF8 : CP_ACP;
+		int wide = MultiByteToWideChar(codePage, 0, data, length, nullptr, 0);
+		MultiByteToWideChar(codePage, 0, data, length, text.GetBuffer(wide), wide);
+		text.ReleaseBuffer(wide);
+	}
+
+	int pos = 0;
+	CString line = text.Tokenize(L"\r\n", pos);
+	while(pos != -1)
+	{
+		line.Trim();
+		line.Trim(L'"');
+		if(!line.IsEmpty()) lines.push_back(line);
+		line = text.Tokenize(L"\r\n", pos);
+	}
+	return lines;
+}
+
+static bool WriteTextFile(const CString& path, const CString& text)		// UTF-8 with a byte-order mark
+{
+	FILE* file = nullptr;
+	if(_wfopen_s(&file, path, L"wb") != 0 || file == nullptr) return false;
+	int bytes = WideCharToMultiByte(CP_UTF8, 0, text, text.GetLength(), nullptr, 0, nullptr, nullptr);
+	std::string utf8(bytes, '\0');
+	WideCharToMultiByte(CP_UTF8, 0, text, text.GetLength(), utf8.data(), bytes, nullptr, nullptr);
+	fwrite("\xEF\xBB\xBF", 1, 3, file);
+	bool ok = fwrite(utf8.data(), 1, utf8.size(), file) == utf8.size();
+	fclose(file);
+	return ok;
+}
+
+static CString Plural(int count, const wchar_t* one, const wchar_t* many)
+{
+	CString s;
+	s.Format(L"%d %s", count, count == 1 ? one : many);
+	return s;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// The window
+
+CWCopyfindDlg::CWCopyfindDlg(CWnd* pParent)
+	: CDialogEx(IDD_WCOPYFIND_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	m_ptMsg=CPoint(0,0);
 }
 
 void CWCopyfindDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_CHECK_BRIEF_REPORT, m_Check_Brief_Report);
-	DDX_Control(pDX, IDC_SPIN_PERCENTAGE, m_Spin_Percentage);
-	DDX_Control(pDX, IDC_EDIT_PERCENTAGE, m_Edit_Percentage);
-	DDX_Control(pDX, IDC_SPIN_TOLERANCE, m_Spin_Tolerance);
-	DDX_Control(pDX, IDC_EDIT_TOLERANCE, m_Edit_Tolerance);
-	DDX_Control(pDX, IDC_CHECK_SKIP_NONWORDS, m_Check_Skip_Nonwords);
-	DDX_Control(pDX, IDC_CHECK_SKIP_LONG_WORDS, m_Check_Skip_Long_Words);
-	DDX_Control(pDX, IDC_CHECK_IGNORE_OUTER_PUNCTUATION, m_Check_Ignore_Outer_Punctuation);
-	DDX_Control(pDX, IDC_EDIT_SKIP_LENGTH, m_Edit_Skip_Length);
-	DDX_Control(pDX, IDC_CHECK_IGNORE_PUNCTUATION, m_Check_Ignore_Punctuation);
-	DDX_Control(pDX, IDC_CHECK_IGNORE_NUMBERS, m_Check_Ignore_Numbers);
-	DDX_Control(pDX, IDC_CHECK_IGNORE_CASE, m_Check_Ignore_Case);
-	DDX_Control(pDX, IDC_EDIT_THRESHOLD, m_Edit_Threshold);
-	DDX_Control(pDX, IDC_SPIN_THRESHOLD, m_Spin_Threshold);
+	DDX_Control(pDX, IDC_LIST_NEW, m_ListNew);
+	DDX_Control(pDX, IDC_LIST_OLD, m_ListOld);
+	DDX_Control(pDX, IDC_LIST_REPORT, m_ListReport);
+	DDX_Control(pDX, IDC_SPIN_PHRASE, m_SpinPhrase);
+	DDX_Control(pDX, IDC_SPIN_THRESHOLD, m_SpinThreshold);
+	DDX_Control(pDX, IDC_SPIN_TOLERANCE, m_SpinTolerance);
 	DDX_Control(pDX, IDC_PROGRESS, m_Progress);
-	DDX_Control(pDX, IDC_STATIC_STATUS, m_Static_Status);
-	DDX_Control(pDX, IDC_EDIT_FOLDER, m_Edit_Folder);
-	DDX_Control(pDX, IDC_EDIT_PHRASE, m_Edit_Phrase);
-	DDX_Control(pDX, IDC_SPIN_PHRASE, m_Spin_Phrase);
-	DDX_Control(pDX, IDC_LIST_REPORT, m_List_Report);
-	DDX_Control(pDX, IDC_LIST_OLD, m_List_Old);
-	DDX_Control(pDX, IDC_LIST_NEW, m_List_New);
-	DDX_Control(pDX, IDC_COMBO_LANGUAGE, m_Combo_Language);
-	DDX_Control(pDX, IDC_CHECK_BASIC_CHARACTERS, m_Check_Basic_Characters);
 }
 
 BEGIN_MESSAGE_MAP(CWCopyfindDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BUTTON_RUN, OnButtonRun)
-	ON_BN_CLICKED(IDC_BUTTON_VOCABULARY, OnButtonVocabulary)
-	ON_EN_KILLFOCUS(IDC_EDIT_PERCENTAGE, OnKillfocusEditPercentage)
-	ON_EN_KILLFOCUS(IDC_EDIT_TOLERANCE, OnKillfocusEditTolerance)
-	ON_NOTIFY(NM_DBLCLK, IDC_LIST_REPORT, OnNMDblclkListReport)
-	ON_NOTIFY(NM_RCLICK, IDC_LIST_OLD, OnNMRclickListOld)
+	ON_WM_SIZE()
+	ON_WM_GETMINMAXINFO()
+	ON_WM_DROPFILES()
 	ON_WM_CONTEXTMENU()
-	ON_COMMAND(ID__SAVETOFILEOLD, OnSaveToFileOld)
-	ON_COMMAND(ID__LOADFROMFILEOLD, OnLoadFromFileOld)
-	ON_COMMAND(ID__CLEARSELECTIONOLD, OnClearSelectionOld)
-	ON_COMMAND(ID__CLEARALLOLD, OnClearAllOld)
-	ON_NOTIFY(NM_RCLICK, IDC_LIST_NEW, OnNMRclickListNew)
-	ON_COMMAND(ID__LOADFROMFILENEW, OnLoadFromFileNew)
-	ON_COMMAND(ID__SAVETOFILENEW, OnSaveToFileNew)
-	ON_COMMAND(ID__CLEARSELECTIONNEW, OnClearSelectionNew)
-	ON_COMMAND(ID__CLEARALLNEW, OnClearAll)
-	ON_BN_CLICKED(IDC_BUTTON_FOLDER, OnBnClickedButtonFolder)
-	ON_COMMAND(ID__SORTONLOADNEW, OnSortOnLoadNew)
-	ON_COMMAND(ID__SORTONLOADOLD, OnSortOnLoadOld)
-	ON_COMMAND(ID__BROWSEFORDOCUMENTSNEW, OnBrowseForDocumentsNew)
-	ON_COMMAND(ID__BROWSEFORDOCUMENTSOLD, OnBrowseForDocumentsOld)
-	ON_NOTIFY(NM_DBLCLK, IDC_LIST_OLD, OnNMDblclkListOld)
-	ON_NOTIFY(NM_DBLCLK, IDC_LIST_NEW, OnNMDblclkListNew)
-	ON_NOTIFY(LVN_KEYDOWN, IDC_LIST_OLD, OnLvnKeydownListOld)
-	ON_NOTIFY(LVN_KEYDOWN, IDC_LIST_NEW, OnLvnKeydownListNew)
-	ON_COMMAND(ID__SAVETOFILE, OnSaveToFileReport)
-	ON_COMMAND(ID__CLEARSELECTION, OnClearSelectionReport)
-	ON_COMMAND(ID__CLEARALL, OnClearAllReport)
-	ON_NOTIFY(NM_RCLICK, IDC_LIST_REPORT, OnNMRclickListReport)
-	ON_NOTIFY(LVN_KEYDOWN, IDC_LIST_REPORT, OnLvnKeydownListReport)
-	ON_MESSAGE(WU_UITHREAD_TERMINATED, OnComparisonTerminated)
-	ON_COMMAND(ID__VIEWREPORTINBROWSER, OnViewReportInBrowser)
+	ON_BN_CLICKED(IDC_BUTTON_ADD_NEW, OnAddNew)
+	ON_BN_CLICKED(IDC_BUTTON_ADD_OLD, OnAddOld)
+	ON_BN_CLICKED(IDC_BUTTON_REMOVE_NEW, OnRemoveNew)
+	ON_BN_CLICKED(IDC_BUTTON_REMOVE_OLD, OnRemoveOld)
+	ON_NOTIFY(BCN_DROPDOWN, IDC_BUTTON_ADD_NEW, OnAddDropDown)
+	ON_NOTIFY(BCN_DROPDOWN, IDC_BUTTON_ADD_OLD, OnAddDropDown)
+	ON_COMMAND_RANGE(ID_LIST_LOAD, ID_LIST_ADD, OnListCommand)
+	ON_COMMAND_RANGE(ID_REPORT_OPEN, ID_REPORT_CLEAR, OnReportCommand)
+	ON_BN_CLICKED(IDC_BUTTON_OPTIONS, OnButtonOptions)
+	ON_BN_CLICKED(IDC_BUTTON_COMPARE, OnButtonCompare)
+	ON_BN_CLICKED(IDC_BUTTON_REPORT, OnButtonReport)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_NEW, OnDocsItemChanged)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_OLD, OnDocsItemChanged)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST_NEW, OnDocsDblClick)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST_OLD, OnDocsDblClick)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST_REPORT, OnReportDblClick)
+	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LIST_REPORT, OnReportColumnClick)
+	ON_MESSAGE(WU_PROGRESS, OnProgress)
+	ON_MESSAGE(WU_PAIR, OnPair)
+	ON_MESSAGE(WU_DONE, OnDone)
 END_MESSAGE_MAP()
-
-
-// CWCopyfindDlg message handlers
 
 BOOL CWCopyfindDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	// Add "About..." menu item to system menu.
-
-	// IDM_ABOUTBOX must be in the system command range.
-	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
-	ASSERT(IDM_ABOUTBOX < 0xF000);
-
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
-	if (pSysMenu != NULL)
+	if(pSysMenu != nullptr)
 	{
-		BOOL bNameValid;
-		CString strAboutMenu;
-		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
-		ASSERT(bNameValid);
-		if (!strAboutMenu.IsEmpty())
-		{
-			pSysMenu->AppendMenu(MF_SEPARATOR);
-			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
-		}
+		CString about;
+		about.LoadString(IDS_ABOUTBOX);
+		pSysMenu->AppendMenu(MF_SEPARATOR);
+		pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, about);
 	}
+	SetIcon(m_hIcon, TRUE);
+	SetIcon(m_hIcon, FALSE);
+	SetWindowText(WCOPYFIND_NAME);
 
-	// Set the icon for this dialog.  The framework does this automatically
-	//  when the application's main window is not a dialog
-	SetIcon(m_hIcon, TRUE);			// Set big icon
-	SetIcon(m_hIcon, FALSE);		// Set small icon
+	LOGFONT lf;
+	GetFont()->GetLogFont(&lf);
+	lf.lfWeight = FW_BOLD;
+	lf.lfHeight = lf.lfHeight * 11 / 10;
+	m_BoldFont.CreateFontIndirect(&lf);
+	for(int id : {IDC_STATIC_STEP1, IDC_STATIC_STEP2, IDC_STATIC_STEP3}) GetDlgItem(id)->SetFont(&m_BoldFont);
 
-	// TODO: Add extra initialization here
+	int scroll = GetSystemMetrics(SM_CXVSCROLL);
+	for(int list : {NEW_LIST, OLD_LIST})
+	{
+		CListCtrl& ctrl = List(list);
+		ctrl.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
+		CRect r;
+		ctrl.GetClientRect(&r);
+		ctrl.InsertColumn(0, L"Document", LVCFMT_LEFT, r.Width() * 40 / 100);
+		ctrl.InsertColumn(1, L"Folder", LVCFMT_LEFT, r.Width() * 60 / 100 - scroll);
+	}
+	m_ListReport.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
+	CRect r;
+	m_ListReport.GetClientRect(&r);
+	int unit = r.Width() / 100;
+	m_ListReport.InsertColumn(0, L"", LVCFMT_LEFT, 0);		// a list's first column can't be right-aligned, so start with a
+	m_ListReport.InsertColumn(1, L"Matching words", LVCFMT_RIGHT, unit * 17);	// placeholder and delete it below
+	m_ListReport.InsertColumn(2, L"% of A", LVCFMT_RIGHT, unit * 9);
+	m_ListReport.InsertColumn(3, L"% of B", LVCFMT_RIGHT, unit * 9);
+	m_ListReport.InsertColumn(4, L"Document A", LVCFMT_LEFT, unit * 32);
+	m_ListReport.InsertColumn(5, L"Document B", LVCFMT_LEFT, r.Width() - unit * 67 - scroll);
+	m_ListReport.DeleteColumn(0);
 
-	CFileDropListCtrl::DROPLISTMODE OldDropMode;
-	
-	OldDropMode.iMask = CFileDropListCtrl::DL_ACCEPT_FILES;
+	m_SpinPhrase.SetRange32(1, 999);
+	m_SpinThreshold.SetRange32(1, 99999);
+	m_SpinTolerance.SetRange32(0, 9);
 
-	m_List_Old.SetDropMode(OldDropMode);
+	// When the window grows, the new-documents list takes 25% of the extra height, the old-documents list 15%,
+	// and the list of matching pairs the remaining 60%.
+	m_Layout.Init(this);
+	m_Layout.Add(IDC_STATIC_NEW, 0, 0, 100, 0);
+	m_Layout.Add(IDC_STATIC_NEW_COUNT, 100, 0, 0, 0);
+	m_Layout.Add(IDC_LIST_NEW, 0, 0, 100, 25);
+	m_Layout.Add(IDC_BUTTON_ADD_NEW, 100, 0, 0, 0);
+	m_Layout.Add(IDC_BUTTON_REMOVE_NEW, 100, 0, 0, 0);
+	m_Layout.Add(IDC_STATIC_OLD, 0, 25, 100, 0);
+	m_Layout.Add(IDC_STATIC_OLD_COUNT, 100, 25, 0, 0);
+	m_Layout.Add(IDC_LIST_OLD, 0, 25, 100, 15);
+	m_Layout.Add(IDC_BUTTON_ADD_OLD, 100, 25, 0, 0);
+	m_Layout.Add(IDC_BUTTON_REMOVE_OLD, 100, 25, 0, 0);
+	m_Layout.Add(IDC_STATIC_HINT1, 0, 40, 100, 0);
+	for(int id : {IDC_STATIC_STEP2, IDC_STATIC_PHRASE1, IDC_EDIT_PHRASE, IDC_SPIN_PHRASE, IDC_STATIC_PHRASE2, IDC_STATIC_THRESHOLD1,
+		IDC_EDIT_THRESHOLD, IDC_SPIN_THRESHOLD, IDC_STATIC_THRESHOLD2, IDC_STATIC_TOLERANCE1, IDC_EDIT_TOLERANCE, IDC_SPIN_TOLERANCE,
+		IDC_STATIC_TOLERANCE2, IDC_CHECK_IGNORE_CASE, IDC_CHECK_IGNORE_PUNCTUATION, IDC_CHECK_IGNORE_NUMBERS, IDC_STATIC_STEP3, IDC_BUTTON_COMPARE})
+		m_Layout.Add(id, 0, 40, 0, 0);
+	m_Layout.Add(IDC_BUTTON_OPTIONS, 100, 40, 0, 0);
+	m_Layout.Add(IDC_STATIC_STATUS, 0, 40, 100, 0);
+	m_Layout.Add(IDC_PROGRESS, 0, 40, 100, 0);
+	m_Layout.Add(IDC_LIST_REPORT, 0, 40, 100, 60);
+	m_Layout.Add(IDC_STATIC_HINT3, 0, 100, 100, 0);
+	m_Layout.Add(IDC_BUTTON_REPORT, 100, 100, 0, 0);
 
-	RECT ListOldRect;
-	m_List_Old.GetClientRect(&ListOldRect);
-	int nVScrollBarWidth = ::GetSystemMetrics(SM_CXVSCROLL);
-	int nListOldWidth = (ListOldRect.right - ListOldRect.left - nVScrollBarWidth);
+	DragAcceptFiles(TRUE);
+	ChangeWindowMessageFilterEx(m_hWnd, WM_DROPFILES, MSGFLT_ALLOW, nullptr);	// allow drops from Explorer if run elevated
+	ChangeWindowMessageFilterEx(m_hWnd, WM_COPYDATA, MSGFLT_ALLOW, nullptr);
+	ChangeWindowMessageFilterEx(m_hWnd, 0x0049 /* WM_COPYGLOBALDATA */, MSGFLT_ALLOW, nullptr);
 
-	m_List_Old.InsertColumn(0, _T("Old Documents"), LVCFMT_LEFT, nListOldWidth,0);
-
-	m_List_Old.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT);
-	m_ImageListOld.Create(IDR_FILE_IMAGES, 16, 16, RGB(255,0,255));
-	m_List_Old.SetImageList(&m_ImageListOld, LVSIL_SMALL);
-
-	CFileDropListCtrl::DROPLISTMODE NewDropMode;
-	
-	NewDropMode.iMask = CFileDropListCtrl::DL_ACCEPT_FILES;
-
-	m_List_New.SetDropMode(NewDropMode);
-
-	RECT ListNewRect;
-	m_List_New.GetClientRect(&ListNewRect);
-	int nListNewWidth = (ListNewRect.right - ListNewRect.left - nVScrollBarWidth);
-
-	m_List_New.InsertColumn(0, _T("New Documents"), LVCFMT_LEFT, nListNewWidth,0);
-
-	m_List_New.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT);
-	m_ImageListNew.Create(IDR_FILE_IMAGES, 16, 16, RGB(255,0,255));
-	m_List_New.SetImageList(&m_ImageListNew, LVSIL_SMALL);
-	
-	RECT ListReportRect;
-	m_List_Report.GetClientRect(&ListReportRect);
-	int nListReportWidth = (ListReportRect.right - ListReportRect.left - nVScrollBarWidth);
-
-	int nCol0ReportWidth = nListReportWidth * 1 / 4;
-	int nCol1ReportWidth = nListReportWidth * 1 / 4;
-	int nCol2ReportWidth = nListReportWidth * 1 / 4;
-	int nCol3ReportWidth = nListReportWidth * 1 / 4;
-
-	m_List_Report.InsertColumn(0, _T("Perfect Match"), LVCFMT_LEFT, nCol0ReportWidth,0);
-	m_List_Report.InsertColumn(1, _T("Overall Match"), LVCFMT_LEFT, nCol1ReportWidth,1);
-	m_List_Report.InsertColumn(2, _T("File L"), LVCFMT_LEFT, nCol2ReportWidth,2);
-	m_List_Report.InsertColumn(3, _T("File R"), LVCFMT_LEFT, nCol3ReportWidth,3);
-	m_List_Report.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT);
-
-	m_Spin_Phrase.SetRange(1,999);
-	m_Spin_Threshold.SetRange(1,9999);
-//	m_Spin_Stringlen.SetRange(1,WORDMAXIMUMLENGTH);
-	m_Spin_Tolerance.SetRange(0,9);
-	m_Spin_Percentage.SetRange(0,100);
-
-	wchar_t sstring[256];
-	CString szstring;
-
-	m_Combo_Language.AddString(L"Chinese");
-	m_Combo_Language.AddString(L"Chinese-Simplified");
-	m_Combo_Language.AddString(L"Chinese-Traditional");
-	m_Combo_Language.AddString(L"Czech");
-	m_Combo_Language.AddString(L"Danish");
-	m_Combo_Language.AddString(L"Dutch");
-	m_Combo_Language.AddString(L"Dutch-Belgian");
-	m_Combo_Language.AddString(L"English");
-	m_Combo_Language.AddString(L"English-American");
-	m_Combo_Language.AddString(L"English-Aus");
-	m_Combo_Language.AddString(L"English-Can");
-	m_Combo_Language.AddString(L"English-Nz");
-	m_Combo_Language.AddString(L"English-Uk");
-	m_Combo_Language.AddString(L"Finnish");
-	m_Combo_Language.AddString(L"French");
-	m_Combo_Language.AddString(L"French-Belgian");
-	m_Combo_Language.AddString(L"French-Canadian");
-	m_Combo_Language.AddString(L"French-Swiss");
-	m_Combo_Language.AddString(L"German");
-	m_Combo_Language.AddString(L"German-Austrian");
-	m_Combo_Language.AddString(L"German-Swiss");
-	m_Combo_Language.AddString(L"Greek");
-	m_Combo_Language.AddString(L"Hungarian");
-	m_Combo_Language.AddString(L"Icelandic");
-	m_Combo_Language.AddString(L"Italian");
-	m_Combo_Language.AddString(L"Italian-Swiss");
-	m_Combo_Language.AddString(L"Japanese");
-	m_Combo_Language.AddString(L"Korean");
-	m_Combo_Language.AddString(L"Norwegian");
-	m_Combo_Language.AddString(L"Norwegian-Bokmal");
-	m_Combo_Language.AddString(L"Norwegian-Nynorsk");
-	m_Combo_Language.AddString(L"Polish");
-	m_Combo_Language.AddString(L"Portuguese");
-	m_Combo_Language.AddString(L"Portuguese-Brazilian");
-	m_Combo_Language.AddString(L"Russian");
-	m_Combo_Language.AddString(L"Slovak");
-	m_Combo_Language.AddString(L"Spanish");
-	m_Combo_Language.AddString(L"Spanish-Mexican");
-	m_Combo_Language.AddString(L"Spanish-Modern");
-	m_Combo_Language.AddString(L"Swedish");
-	m_Combo_Language.AddString(L"Turkish");
-//	m_Combo_Language.SelectString(-1,L"English");
-	
-// reload settings from registry
-	
-	int value;
-
-	GetRegistryValue(L"Phrase_Length",&value,6);
-	_itow_s(value,sstring,10);
-	m_Edit_Phrase.SetWindowTextW(sstring);
-
-	GetRegistryValue(L"Report_Threshold",&value,100);
-	_itow_s(value,sstring,10);
-	m_Edit_Threshold.SetWindowTextW(sstring);
-
-//	GetRegistryValue(L"String_Length",&value,100);
-//	_itow_s(value,sstring,10);
-//	m_Edit_Stringlen.SetWindowTextW(sstring);
-
-	GetRegistryValue(L"Tolerance",&value,0);
-	_itow_s(value,sstring,10);
-	m_Edit_Tolerance.SetWindowTextW(sstring);
-
-	GetRegistryValue(L"Percentage",&value,100);
-	_itow_s(value,sstring,10);
-	m_Edit_Percentage.SetWindowTextW(sstring);
-
-	GetRegistryValue(L"Skip_Length",&value,20);
-	_itow_s(value,sstring,10);
-	m_Edit_Skip_Length.SetWindowTextW(sstring);
-	
-	GetRegistryValue(L"Ignore_Punctuation",&value,FALSE);
-	m_Check_Ignore_Punctuation.SetCheck(value);
-
-	GetRegistryValue(L"Ignore_Outer_Punctuation",&value,FALSE);
-	m_Check_Ignore_Outer_Punctuation.SetCheck(value);
-
-	GetRegistryValue(L"Ignore_Numbers",&value,FALSE);
-	m_Check_Ignore_Numbers.SetCheck(value);
-
-	GetRegistryValue(L"Ignore_Case",&value,FALSE);
-	m_Check_Ignore_Case.SetCheck(value);
-
-	GetRegistryValue(L"Skip_Long_Words",&value,FALSE);
-	m_Check_Skip_Long_Words.SetCheck(value);
-
-	GetRegistryValue(L"Skip_Nonwords",&value,FALSE);
-	m_Check_Skip_Nonwords.SetCheck(value);
-
-	GetRegistryValue(L"Basic_Characters",&value,FALSE);
-	m_Check_Basic_Characters.SetCheck(value);
-
-	GetRegistrySValue(L"Report_Folder",&szstring,L"C:\\WCopyfind\\Report");
-	m_Edit_Folder.SetWindowTextW(szstring);
-	
-	GetRegistryValue(L"Brief_Report",&value,FALSE);
-	m_Check_Brief_Report.SetCheck(value);
-
-	GetRegistrySValue(L"Language",&szstring,L"English");
-	m_Combo_Language.SelectString(-1,szstring);
-
-// done reloading settings from registry
-
-	m_Progress.SetPos(0);
-
-	m_Menu=0;
-
-	m_Sort_On_Load_Old=true;
-	m_Sort_On_Load_New=true;
-
-	return TRUE;  // return TRUE  unless you set the focus to a control
+	WriteControls();
+	RefreshList(NEW_LIST, {});
+	RefreshList(OLD_LIST, {});
+	CString index = theApp.m_ReportFolder + L"\\matches.html";
+	if(PathFileExistsW(index))
+	{
+		m_IndexPath = index;
+		m_ReportFolder = theApp.m_ReportFolder;
+	}
+	SetDlgItemText(IDC_STATIC_STATUS, theApp.m_Documents[NEW_LIST].empty() ? L"Add the documents to compare to get started." : L"Ready.");
+	UpdateControls();
+	GetDlgItem(IDC_BUTTON_COMPARE)->SetFocus();
+	return FALSE;
 }
 
 void CWCopyfindDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
+	if((nID & 0xFFF0) == IDM_ABOUTBOX)
 	{
-		CAboutDlg dlgAbout;
-		dlgAbout.DoModal();
+		CAboutDlg about;
+		about.DoModal();
 	}
-	else
-	{
-		CDialogEx::OnSysCommand(nID, lParam);
-	}
+	else CDialogEx::OnSysCommand(nID, lParam);
 }
-
-// If you add a minimize button to your dialog, you will need the code below
-//  to draw the icon.  For MFC applications using the document/view model,
-//  this is automatically done for you by the framework.
 
 void CWCopyfindDlg::OnPaint()
 {
-	if (IsIconic())
+	if(IsIconic())
 	{
-		CPaintDC dc(this); // device context for painting
-
+		CPaintDC dc(this);
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
-
-		// Center icon in client rectangle
-		int cxIcon = GetSystemMetrics(SM_CXICON);
-		int cyIcon = GetSystemMetrics(SM_CYICON);
 		CRect rect;
 		GetClientRect(&rect);
-		int x = (rect.Width() - cxIcon + 1) / 2;
-		int y = (rect.Height() - cyIcon + 1) / 2;
-
-		// Draw the icon
-		dc.DrawIcon(x, y, m_hIcon);
+		dc.DrawIcon((rect.Width() - GetSystemMetrics(SM_CXICON) + 1) / 2, (rect.Height() - GetSystemMetrics(SM_CYICON) + 1) / 2, m_hIcon);
 	}
-	else
-	{
-		CDialogEx::OnPaint();
-	}
+	else CDialogEx::OnPaint();
 }
 
-// The system calls this function to obtain the cursor to display while the user drags
-//  the minimized window.
 HCURSOR CWCopyfindDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-	unsigned int  threadFunc( void* pArgument );
-
-void CWCopyfindDlg::OnButtonRun() 
+void CWCopyfindDlg::OnSize(UINT nType, int cx, int cy)
 {
-	if(m_pUiThread) return;
-
-	extern std::atomic<bool> g_abort;
-	g_abort = false;
-
-	m_pAbortDlg = new CAbortDlg;
-	m_pAbortDlg->Create(IDD_ABORTDLG, this);
-	m_pAbortDlg->ShowWindow(SW_SHOW);
-
-	m_pargs = new thread_args;
-	m_pargs->hWnd = GetSafeHwnd();
-	m_pargs->pDialog = this;
-	m_pargs->returnVal = 0;
-	
-	m_pUiThread = (CUiThread*)AfxBeginThread(RUNTIME_CLASS(CUiThread));
-
-	m_pUiThread->PostThreadMessage(WU_UITHREAD_START,0,(LPARAM)m_pargs);
-}
-LRESULT CWCopyfindDlg::OnComparisonTerminated(WPARAM, LPARAM)
-{
-	if(m_pAbortDlg){ 
-		m_pAbortDlg->DestroyWindow();
-		delete m_pAbortDlg; m_pAbortDlg = NULL;
-	}
-	if(m_pargs){
-		delete m_pargs; m_pargs = NULL;
-	}
-	m_pUiThread->PostThreadMessage(WU_UITHREAD_TERMINATE,0,0);
-	WaitForSingleObject(m_pUiThread->m_hThread,INFINITE);
-	m_pUiThread = NULL;
-	return 0;
+	CDialogEx::OnSize(nType, cx, cy);
+	if(nType == SIZE_MINIMIZED || !m_Layout.IsReady()) return;
+	m_Layout.Resize();
+	FitColumns();
 }
 
-void CWCopyfindDlg::OnButtonVocabulary() 
+void CWCopyfindDlg::FitColumns()
 {
-	FILE *fvocab = NULL;
-	CString szExtension = L"txt";
-	static wchar_t BASED_CODE szFilter[] = L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
-	
-	while(fvocab == NULL)
+	for(CListCtrl* list : {&m_ListNew, &m_ListOld, &m_ListReport})	// let the last column take up the remaining width
 	{
-		CFileDialog ifiledlg(FALSE,szExtension,NULL,OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST,szFilter);
-		if(ifiledlg.DoModal() != IDOK) return;
-		_wfopen_s(&fvocab,ifiledlg.GetPathName(),L"w");
+		if(list->GetSafeHwnd() == nullptr) continue;
+		CHeaderCtrl* header = list->GetHeaderCtrl();
+		int columns = header ? header->GetItemCount() : 0;
+		if(columns < 2) continue;
+		CRect client;
+		list->GetClientRect(&client);
+		int used = 0;
+		for(int c = 0; c < columns - 1; c++) used += list->GetColumnWidth(c);
+		list->SetColumnWidth(columns - 1, (std::max)(80, client.Width() - used));
 	}
-	
-	CString szstring;
-	unsigned int skip_length;
-
-	m_Edit_Skip_Length.GetWindowText(szstring);
-	skip_length=_wtoi(szstring);
-
-	int docs=m_List_Old.GetItemCount()+m_List_New.GetItemCount();
-	
-	wchar_t docname[256];
-	wchar_t word[WORDBUFFERLENGTH];
-	int fcount;
-	std::unordered_map<std::wstring, int> vocab;
-	CInputDocument indoc;
-	int delimitertype;
-
-	m_Static_Status.ShowWindow(SW_SHOW);
-	m_Progress.ShowWindow(SW_SHOW);
-	m_Static_Status.SetWindowTextW(L"Building Vocabulary");
-	
-	bool bignore_case = (m_Check_Ignore_Case.GetCheck() == TRUE);
-	bool bignore_numbers = (m_Check_Ignore_Numbers.GetCheck() == TRUE);
-	bool bignore_punctuation = (m_Check_Ignore_Punctuation.GetCheck() == TRUE);
-	bool bignore_outer_punctuation = (m_Check_Ignore_Outer_Punctuation.GetCheck() == TRUE);
-	bool bskip_long_words = (m_Check_Skip_Long_Words.GetCheck() == TRUE);
-	bool bskip_nonwords = (m_Check_Skip_Nonwords.GetCheck() == TRUE);
-	bool bBasic_Characters = (m_Check_Basic_Characters.GetCheck() == TRUE);
-
-	int irvalue;
-
-	for(fcount=0;fcount<m_List_Old.GetItemCount();fcount++)
-	{
-		m_Progress.SetPos(fcount*100/docs);
-		wcscpy_s(docname,256,m_List_Old.GetItemText(fcount,0));
-		irvalue = indoc.OpenDocument(docname);
-		if(irvalue > -1)
-		{
-			indoc.CloseDocument();							// close document
-			continue;
-		}
-
-		delimitertype=DEL_TYPE_WHITE;
-		while(delimitertype != DEL_TYPE_EOF)
-		{
-			indoc.GetWord(word,delimitertype);
-
-			if(bignore_punctuation) WordRemovePunctuation(word);	// if ignore punctuation is active, remove punctuation
-			if(bignore_outer_punctuation) wordxouterpunct(word);	// if ignore outer punctuation is active, remove outer punctuation
-			if(bignore_numbers) WordRemoveNumbers(word);			// if ignore numbers is active, remove numbers
-			if(bignore_case) WordToLowerCase(word);			// if ignore case is active, remove case
-			if( bskip_long_words && (wcslen(word)>skip_length) ) continue;	// if skip too-long words is active, skip them
-			if( bskip_nonwords && (!WordCheck(word)) ) continue;	// if skip nonwords is active, skip them
-			
-			vocab[word]++;
-		}
-		indoc.CloseDocument();
-	}
-	
-	for(fcount=0;fcount<m_List_New.GetItemCount();fcount++)
-	{
-		m_Progress.SetPos((m_List_Old.GetItemCount()+fcount)*100/docs);
-		wcscpy_s(docname,256,m_List_New.GetItemText(fcount,0));
-		irvalue = indoc.OpenDocument(docname);
-		if(irvalue > -1)
-		{
-			indoc.CloseDocument();							// close document
-			continue;
-		}
-		delimitertype=DEL_TYPE_WHITE;
-		while(delimitertype != DEL_TYPE_EOF)
-		{
-			indoc.GetWord(word,delimitertype);
-
-			if(bignore_punctuation) WordRemovePunctuation(word);	// if ignore punctuation is active, remove punctuation
-			if(bignore_outer_punctuation) wordxouterpunct(word);	// if ignore outer punctuation is active, remove outer punctuation
-			if(bignore_numbers) WordRemoveNumbers(word);			// if ignore numbers is active, remove numbers
-			if(bignore_case) WordToLowerCase(word);			// if ignore case is active, remove case
-			if( bskip_long_words && (wcslen(word)>skip_length) ) continue;	// if skip too-long words is active, skip them
-			if( bskip_nonwords && (!WordCheck(word)) ) continue;	// if skip nonwords is active, skip them
-			
-			vocab[word]++;
-		}
-		indoc.CloseDocument();
-	}
-
-	m_Static_Status.SetWindowTextW(L"Saving Vocabulary to File");
-	for (const auto& entry : vocab)
-		fwprintf(fvocab, L"%d\t%s\n", entry.second, entry.first.c_str());
-	fclose(fvocab);
-
-	m_Static_Status.ShowWindow(SW_HIDE);
-	m_Progress.ShowWindow(SW_HIDE);
 }
 
-void CWCopyfindDlg::OnOK() 
+void CWCopyfindDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 {
-// save settings to registry
-	
-	int value;
-	CString szstring;
-	wchar_t string[256];
-
-	m_Edit_Phrase.GetWindowText(szstring);
-	value=_wtoi(szstring);
-	SetRegistryValue(L"Phrase_Length",value);
-
-	m_Edit_Threshold.GetWindowText(szstring);
-	value=_wtoi(szstring);
-	SetRegistryValue(L"Report_Threshold",value);
-
-	m_Edit_Tolerance.GetWindowText(szstring);
-	value=_wtoi(szstring);
-	SetRegistryValue(L"Tolerance",value);
-
-	m_Edit_Percentage.GetWindowText(szstring);
-	value=_wtoi(szstring);
-	SetRegistryValue(L"Percentage",value);
-
-	m_Edit_Skip_Length.GetWindowText(szstring);
-	value=_wtoi(szstring);
-	SetRegistryValue(L"Skip_Length",value);
-
-	value=m_Check_Ignore_Punctuation.GetCheck();
-	SetRegistryValue(L"Ignore_Punctuation",value);
-
-	value=m_Check_Ignore_Outer_Punctuation.GetCheck();
-	SetRegistryValue(L"Ignore_Outer_Punctuation",value);
-
-	value=m_Check_Ignore_Numbers.GetCheck();
-	SetRegistryValue(L"Ignore_Numbers",value);
-
-	value=m_Check_Ignore_Case.GetCheck();
-	SetRegistryValue(L"Ignore_Case",value);
-
-	value=m_Check_Skip_Long_Words.GetCheck();
-	SetRegistryValue(L"Skip_Long_Words",value);
-
-	value=m_Check_Skip_Nonwords.GetCheck();
-	SetRegistryValue(L"Skip_Nonwords",value);
-
-	value=m_Check_Basic_Characters.GetCheck();
-	SetRegistryValue(L"Basic_Characters",value);
-
-	m_Edit_Folder.GetWindowText(string,256);
-	SetRegistrySValue(L"Report_Folder",string);
-
-	value=m_Check_Brief_Report.GetCheck();
-	SetRegistryValue(L"Brief_Report",value);
-
-	m_Combo_Language.GetWindowTextW(string,256);
-	SetRegistrySValue(L"Language",string);
-
-// done saving settings to registry
-	
-	CDialog::OnOK();
+	if(m_Layout.IsReady())
+	{
+		lpMMI->ptMinTrackSize.x = m_Layout.MinTrackSize().cx;
+		lpMMI->ptMinTrackSize.y = m_Layout.MinTrackSize().cy;
+	}
+	CDialogEx::OnGetMinMaxInfo(lpMMI);
 }
 
-void CWCopyfindDlg::GetRegistryValue(const wchar_t *name, int *value, int valuedefault)
+BOOL CWCopyfindDlg::PreTranslateMessage(MSG* pMsg)
 {
-	HKEY HKEY_Software,HKEY_WCopyfind;
-	unsigned long RegResult;
-	unsigned long lvalue;
-	unsigned long ltype;
-	unsigned long llength;
-
-	ltype=REG_DWORD;
-	llength=4;
-	lvalue=valuedefault;
-
-	if(RegCreateKeyEx(HKEY_CURRENT_USER,L"Software",0,nullptr,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&HKEY_Software,&RegResult) == ERROR_SUCCESS)
+	if(pMsg->message == WM_KEYDOWN && !m_Running)
 	{
-		if(RegCreateKeyEx(HKEY_Software,L"WCopyfind",0,nullptr,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&HKEY_WCopyfind,&RegResult) == ERROR_SUCCESS)
+		for(int list : {NEW_LIST, OLD_LIST})
 		{
-            if(RegQueryValueEx(HKEY_WCopyfind,name,0,&ltype,(LPBYTE)&lvalue,&llength) != ERROR_SUCCESS)
+			if(pMsg->hwnd != List(list).m_hWnd) continue;
+			if(pMsg->wParam == VK_DELETE)
 			{
-				lvalue=valuedefault;
+				RemoveSelected(list);
+				return TRUE;
 			}
-			RegCloseKey(HKEY_WCopyfind);
+			if(pMsg->wParam == 'A' && GetKeyState(VK_CONTROL) < 0)
+			{
+				for(int i = 0; i < List(list).GetItemCount(); i++) List(list).SetItemState(i, LVIS_SELECTED, LVIS_SELECTED);
+				return TRUE;
+			}
 		}
-		RegCloseKey(HKEY_Software);
-	}
-
-	*value=lvalue;
-}
-
-void CWCopyfindDlg::SetRegistryValue(const wchar_t *name, int value)
-{
-	HKEY HKEY_Software,HKEY_WCopyfind;
-	unsigned long RegResult;
-	unsigned long lvalue;
-	unsigned long ltype;
-	unsigned long llength;
-
-	ltype=REG_DWORD;
-	llength=4;
-	lvalue=value;
-
-	if(RegCreateKeyEx(HKEY_CURRENT_USER,L"Software",0,nullptr,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&HKEY_Software,&RegResult) == ERROR_SUCCESS)
-	{
-        if(RegCreateKeyEx(HKEY_Software,L"WCopyfind",0,nullptr,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&HKEY_WCopyfind,&RegResult) == ERROR_SUCCESS)
+		if(pMsg->hwnd == m_ListReport.m_hWnd)
 		{
-            RegSetValueEx(HKEY_WCopyfind,name,0,ltype,(LPBYTE)&lvalue,llength);
-			RegCloseKey(HKEY_WCopyfind);
+			if(pMsg->wParam == VK_RETURN)
+			{
+				OpenPair(m_ListReport.GetNextItem(-1, LVNI_SELECTED));
+				return TRUE;
+			}
+			if(pMsg->wParam == VK_DELETE)
+			{
+				OnReportCommand(ID_REPORT_REMOVE);
+				return TRUE;
+			}
 		}
-		RegCloseKey(HKEY_Software);
 	}
+	return CDialogEx::PreTranslateMessage(pMsg);
 }
 
-void CWCopyfindDlg::GetRegistrySValue(const wchar_t *name, CString *szvalue, const wchar_t *svaluedefault)
+void CWCopyfindDlg::OnOK()
 {
-	HKEY HKEY_Software,HKEY_WCopyfind;
-	unsigned long RegResult;
+	// Enter is handled by the default button (Compare Documents); don't close the window
+}
 
-	RegCreateKeyEx(HKEY_CURRENT_USER,L"Software",0,nullptr,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&HKEY_Software,&RegResult);
-	RegCreateKeyEx(HKEY_Software,L"WCopyfind",0,nullptr,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&HKEY_WCopyfind,&RegResult);
-
-	unsigned long ltype;
-	unsigned long llength;
-
-	ltype=REG_SZ;
-	llength=256;
-
-	char string8[256];
-
-	if(RegQueryValueEx(HKEY_WCopyfind,name,0,&ltype,(LPBYTE)string8,&llength) == ERROR_SUCCESS)
+void CWCopyfindDlg::OnCancel()
+{
+	if(m_Running)
 	{
-		*szvalue=string8;
+		if(AfxMessageBox(L"WCopyfind is still comparing documents. Stop and close?", MB_YESNO | MB_ICONQUESTION) != IDYES) return;
+		StopWorker();
 	}
-	else
-	{
-		*szvalue=*svaluedefault;
-	}
-	RegCloseKey(HKEY_WCopyfind);
-	RegCloseKey(HKEY_Software);
+	ReadControls();
+	CDialogEx::OnCancel();
 }
 
-void CWCopyfindDlg::SetRegistrySValue(const wchar_t *name, const wchar_t *svalue)
+// ---------------------------------------------------------------------------------------------------------
+// Document lists
+
+void CWCopyfindDlg::OnAddNew() { AddDocuments(NEW_LIST); }
+void CWCopyfindDlg::OnAddOld() { AddDocuments(OLD_LIST); }
+void CWCopyfindDlg::OnRemoveNew() { RemoveSelected(NEW_LIST); }
+void CWCopyfindDlg::OnRemoveOld() { RemoveSelected(OLD_LIST); }
+
+void CWCopyfindDlg::OnAddDropDown(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	HKEY HKEY_Software,HKEY_WCopyfind;
-	unsigned long RegResult;
-
-	RegCreateKeyEx(HKEY_CURRENT_USER,L"Software",0,nullptr,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&HKEY_Software,&RegResult);
-	RegCreateKeyEx(HKEY_Software,L"WCopyfind",0,nullptr,REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,NULL,&HKEY_WCopyfind,&RegResult);
-
-	unsigned long ltype;
-
-	ltype=REG_SZ;
-
-	char string8[256];
-	size_t string8Length;
-
-	wcstombs_s(&string8Length,string8,256,svalue,_TRUNCATE);
-
-	RegSetValueEx(HKEY_WCopyfind,name,0,ltype,(const BYTE*)string8,(DWORD)string8Length);
-	RegCloseKey(HKEY_WCopyfind);
-	RegCloseKey(HKEY_Software);
-}
-
-void CWCopyfindDlg::OnKillfocusEditPercentage() 
-{
-	int percentage;
-	CString szstring;
-	wchar_t sstring[10];
-	m_Edit_Percentage.GetWindowText(szstring);
-	percentage=_wtoi(szstring);
-	if(percentage>100) percentage=100;
-	if(percentage<0) percentage=0;
-	_itow_s(percentage,sstring,10);
-	m_Edit_Percentage.SetWindowTextW(sstring);
-}
-
-void CWCopyfindDlg::OnKillfocusEditTolerance() 
-{
-	int tolerance;
-	CString szstring;
-	wchar_t sstring[10];
-	m_Edit_Tolerance.GetWindowText(szstring);
-	tolerance=_wtoi(szstring);
-	if(tolerance>9) tolerance=9;
-	if(tolerance<0) tolerance=0;
-	_itow_s(tolerance,sstring,10);
-	m_Edit_Tolerance.SetWindowTextW(sstring);
-}
-
-void CWCopyfindDlg::OnNMDblclkListReport(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	int nitem;
-	CString szreportfileL;
-	CString szreportfileR;
-	wchar_t szdocL[256];
-	wchar_t szdocR[256];
-	CString szfolder;
-	CString szcommand;
-
-	nitem=m_List_Report.GetSelectionMark();
-	m_Edit_Folder.GetWindowText(szfolder);
-	m_List_Report.GetItemText(nitem,2,szdocL,256);
-	m_List_Report.GetItemText(nitem,3,szdocR,256);
-
-	szreportfileL = szfolder + L"\\" + szdocL + L"." + szdocR + L".html";
-	szreportfileR = szfolder + L"\\" + szdocR + L"." + szdocL + L".html";
-
-    HINSTANCE hinst1 = ShellExecute(NULL, // no parent hwnd
-            NULL, // open
-            szreportfileL, // file name
-            NULL, // no parameters
-            NULL, // no directory name
-            SW_SHOWNORMAL); // yes, show it
-
-    HINSTANCE hinst2 = ShellExecute(NULL, // no parent hwnd
-            NULL, // open
-            szreportfileR, // file name
-            NULL, // no parameters
-            NULL, // no directory name
-            SW_SHOWNORMAL); // yes, show it
-
-	*pResult = 0;
-}
-
-void CWCopyfindDlg::OnNMRclickListOld(NMHDR *pNMHDR, LRESULT *pResult)
-{
-//	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
-	m_Menu=1;
-	*pResult = 0;
-}
-
-void CWCopyfindDlg::OnNMRclickListNew(NMHDR *pNMHDR, LRESULT *pResult)
-{
-//	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
-	m_Menu=2;
-	*pResult = 0;
-}
-
-void CWCopyfindDlg::OnNMRclickListReport(NMHDR *pNMHDR, LRESULT *pResult)
-{
-//	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
-	m_Menu=3;
+	NMBCDROPDOWN* drop = reinterpret_cast<NMBCDROPDOWN*>(pNMHDR);
+	CPoint point(drop->rcButton.left, drop->rcButton.bottom);
+	::ClientToScreen(drop->hdr.hwndFrom, &point);
+	ShowListMenu(drop->hdr.idFrom == IDC_BUTTON_ADD_NEW ? NEW_LIST : OLD_LIST, point);
 	*pResult = 0;
 }
 
 void CWCopyfindDlg::OnContextMenu(CWnd* pWnd, CPoint point)
 {
-
-	if(m_Menu == 1)
+	if(m_Running) return;
+	for(int list : {NEW_LIST, OLD_LIST})
 	{
-		CMenu oldMenu;
-		m_ptMsg = point;
-		ScreenToClient( &m_ptMsg);
-		oldMenu.LoadMenu( IDR_POPUP_OLD );
-		if(m_Sort_On_Load_Old)
+		if(pWnd->GetSafeHwnd() != List(list).m_hWnd) continue;
+		if(point.x == -1 && point.y == -1)			// from the keyboard
 		{
-			oldMenu.CheckMenuItem(ID__SORTONLOADOLD,MF_BYCOMMAND|MF_CHECKED);
+			CRect r;
+			List(list).GetWindowRect(&r);
+			point = r.TopLeft();
 		}
+		ShowListMenu(list, point);
+		return;
+	}
+	if(pWnd->GetSafeHwnd() == m_ListReport.m_hWnd)
+	{
+		if(point.x == -1 && point.y == -1)
+		{
+			CRect r;
+			m_ListReport.GetWindowRect(&r);
+			point = r.TopLeft();
+		}
+		CMenu menu;
+		menu.LoadMenu(IDR_MENU_REPORT);
+		CMenu* popup = menu.GetSubMenu(0);
+		bool selected = m_ListReport.GetSelectedCount() > 0;
+		bool any = m_ListReport.GetItemCount() > 0;
+		popup->EnableMenuItem(ID_REPORT_OPEN, selected ? MF_ENABLED : MF_GRAYED);
+		popup->EnableMenuItem(ID_REPORT_REMOVE, selected ? MF_ENABLED : MF_GRAYED);
+		popup->EnableMenuItem(ID_REPORT_SAVE, any ? MF_ENABLED : MF_GRAYED);
+		popup->EnableMenuItem(ID_REPORT_CLEAR, any ? MF_ENABLED : MF_GRAYED);
+		popup->EnableMenuItem(ID_REPORT_INDEX, !m_IndexPath.IsEmpty() && PathFileExistsW(m_IndexPath) ? MF_ENABLED : MF_GRAYED);
+		popup->SetDefaultItem(ID_REPORT_OPEN);
+		popup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+	}
+}
+
+void CWCopyfindDlg::ShowListMenu(int list, CPoint screenPoint)
+{
+	if(m_Running) return;
+	m_MenuList = list;
+	CMenu menu;
+	menu.LoadMenu(IDR_MENU_LIST);
+	CMenu* popup = menu.GetSubMenu(0);
+	bool any = !theApp.m_Documents[list].empty();
+	bool selected = List(list).GetSelectedCount() > 0;
+	popup->ModifyMenu(ID_LIST_MOVE, MF_BYCOMMAND | MF_STRING, ID_LIST_MOVE,
+		list == NEW_LIST ? L"&Move Selected to Old Documents" : L"&Move Selected to New Documents");
+	popup->CheckMenuItem(ID_LIST_KEEP_SORTED, theApp.m_KeepSorted[list] ? MF_CHECKED : MF_UNCHECKED);
+	for(UINT id : {ID_LIST_SAVE, ID_LIST_SORT, ID_LIST_CLEAR}) popup->EnableMenuItem(id, any ? MF_ENABLED : MF_GRAYED);
+	for(UINT id : {ID_LIST_MOVE, ID_LIST_REMOVE}) popup->EnableMenuItem(id, selected ? MF_ENABLED : MF_GRAYED);
+	popup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, screenPoint.x, screenPoint.y, this);
+}
+
+void CWCopyfindDlg::OnListCommand(UINT id)
+{
+	int list = m_MenuList;
+	switch(id)
+	{
+	case ID_LIST_ADD: AddDocuments(list); break;
+	case ID_LIST_ADD_FOLDER: AddFolder(list); break;
+	case ID_LIST_LOAD: LoadList(list); break;
+	case ID_LIST_SAVE: SaveList(list); break;
+	case ID_LIST_SORT: SortList(list); break;
+	case ID_LIST_KEEP_SORTED:
+		theApp.m_KeepSorted[list] = !theApp.m_KeepSorted[list];
+		if(theApp.m_KeepSorted[list]) SortList(list);
+		break;
+	case ID_LIST_MOVE: MoveSelected(list); break;
+	case ID_LIST_REMOVE: RemoveSelected(list); break;
+	case ID_LIST_CLEAR:
+		if(AfxMessageBox(list == NEW_LIST ? L"Remove all the new documents from the list?" : L"Remove all the old documents from the list?",
+			MB_OKCANCEL | MB_ICONQUESTION) == IDOK)
+		{
+			theApp.m_Documents[list].clear();
+			RefreshList(list, {});
+		}
+		break;
+	}
+}
+
+void CWCopyfindDlg::AddDocuments(int list)
+{
+	if(m_Running) return;
+	static const wchar_t filter[] =
+		L"Documents (*.docx;*.doc;*.txt;*.pdf;*.htm;*.html;*.url)|*.docx;*.doc;*.txt;*.pdf;*.htm;*.html;*.url|All Files (*.*)|*.*||";
+	CFileDialog dlg(TRUE, nullptr, nullptr, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_EXPLORER, filter, this);
+	std::vector<wchar_t> buffer(4 * 1024 * 1024, 0);		// room for thousands of file names
+	dlg.m_ofn.lpstrFile = buffer.data();
+	dlg.m_ofn.nMaxFile = (DWORD)buffer.size();
+	dlg.m_ofn.lpstrTitle = list == NEW_LIST ? L"Add New Documents" : L"Add Old Documents";
+	if(dlg.DoModal() != IDOK) return;
+
+	std::vector<CString> paths;
+	POSITION pos = dlg.GetStartPosition();
+	while(pos != nullptr) paths.push_back(dlg.GetNextPathName(pos));
+	AddPaths(list, paths, false);
+}
+
+void CWCopyfindDlg::AddFolder(int list)
+{
+	CFolderPickerDialog dlg(nullptr, 0, this);
+	dlg.m_ofn.lpstrTitle = list == NEW_LIST ? L"Add a Folder of New Documents" : L"Add a Folder of Old Documents";
+	if(dlg.DoModal() == IDOK) AddPaths(list, {dlg.GetPathName()}, true);
+}
+
+// Function: AddPaths
+// Purpose: Adds files to a list, expanding folders (with their subfolders) and shortcuts and skipping duplicates.
+//			A folder contributes only document files; a file chosen or dropped by itself may be of any type.
+
+void CWCopyfindDlg::AddPaths(int list, const std::vector<CString>& paths, bool fromFolder)
+{
+	std::vector<CString> files;
+	for(const CString& path : paths)
+	{
+		if(PathIsDirectoryW(path)) CollectFolder(path, files);
 		else
 		{
-			oldMenu.CheckMenuItem(ID__SORTONLOADOLD,MF_BYCOMMAND|MF_UNCHECKED);
+			CString file = ResolveShortcut(path);
+			if(PathIsDirectoryW(file)) CollectFolder(file, files);
+			else if(!fromFolder || CWCopyfindApp::IsDocumentType(file)) files.push_back(file);
 		}
-		CMenu* pPopup = oldMenu.GetSubMenu(0);
-		pPopup->TrackPopupMenu( TPM_LEFTALIGN|TPM_RIGHTBUTTON,point.x,point.y,this );
 	}
-	else if(m_Menu == 2)
+	std::sort(files.begin(), files.end(), NaturalLess);
+
+	std::vector<CString>& docs = theApp.m_Documents[list];
+	std::vector<bool> selected(docs.size(), false);
+	int added = 0;
+	for(const CString& file : files)
 	{
-		CMenu newMenu;
-		m_ptMsg = point;
-		ScreenToClient( &m_ptMsg);
-		newMenu.LoadMenu( IDR_POPUP_NEW );
-		if(m_Sort_On_Load_New)
+		auto existing = std::find_if(docs.begin(), docs.end(), [&](const CString& d) { return d.CompareNoCase(file) == 0; });
+		if(existing != docs.end())
 		{
-			newMenu.CheckMenuItem(ID__SORTONLOADNEW,MF_BYCOMMAND|MF_CHECKED);
-		}
-		else
-		{
-			newMenu.CheckMenuItem(ID__SORTONLOADNEW,MF_BYCOMMAND|MF_UNCHECKED);
-		}
-		CMenu* pPopup = newMenu.GetSubMenu(0);
-		pPopup->TrackPopupMenu( TPM_LEFTALIGN|TPM_RIGHTBUTTON,point.x,point.y,this );
-	}
-	else if(m_Menu == 3)
-	{
-		CMenu reportMenu;
-		m_ptMsg = point;
-		ScreenToClient( &m_ptMsg);
-		reportMenu.LoadMenu( IDR_POPUP_REPORT );
-		CMenu* pPopup = reportMenu.GetSubMenu(0);
-		pPopup->TrackPopupMenu( TPM_LEFTALIGN|TPM_RIGHTBUTTON,point.x,point.y,this );
-	}
-	else if(m_Menu == 4)
-	{
-		CMenu languageMenu;
-		m_ptMsg = point;
-		ScreenToClient( &m_ptMsg);
-		languageMenu.LoadMenu( IDR_POPUP_LANGUAGE );
-		CMenu* pPopup = languageMenu.GetSubMenu(0);
-		pPopup->TrackPopupMenu( TPM_LEFTALIGN|TPM_RIGHTBUTTON,point.x,point.y,this );
-	}
-	m_Menu = 0;
-}
-
-void CWCopyfindDlg::OnLoadFromFileOld()
-{
-	FILE *fin;
-	CString szExtension = L"txt";
-	static wchar_t BASED_CODE szFilter[] = L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
-
-	while(true)
-	{
-		CFileDialog ifiledlg(TRUE,szExtension,NULL,OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_FILEMUSTEXIST,szFilter);
-		if(ifiledlg.DoModal() != IDOK)
-		{
-			return;
-		}
-		_wfopen_s(&fin,ifiledlg.GetPathName(),L"r");
-		if(fin != NULL) break;
-	}
-
-	wchar_t sstring[256];
-	
-	while(fgetws(sstring,255,fin) != NULL)
-	{
-		sstring[wcslen(sstring)-1]=0;		// bump out the end-of-line character
-		LVFINDINFO lvInfo;
-		lvInfo.flags = LVFI_STRING;
-		lvInfo.psz = sstring;
-
-		if(m_List_Old.FindItem(&lvInfo, -1) != -1)
+			selected[existing - docs.begin()] = true;
 			continue;
-		
-		m_List_Old.InsertItem(m_List_Old.GetItemCount(),sstring);
-	}
-		
-	fclose(fin);
-
-	return;
-}
-
-void CWCopyfindDlg::OnSaveToFileOld()
-{
-	FILE *fout;
-	CString szExtension = L"txt";
-	static wchar_t BASED_CODE szFilter[] = L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
-
-	while(true)
-	{
-		CFileDialog ifiledlg(FALSE,szExtension,NULL,OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST,szFilter);
-		if(ifiledlg.DoModal() != IDOK)
-		{
-			return;
 		}
-		_wfopen_s(&fout,ifiledlg.GetPathName(),L"w");
-		if(fout != NULL) break;
+		docs.push_back(file);
+		selected.push_back(true);
+		added++;
 	}
-
-	int fcount=m_List_Old.GetItemCount();
-
-	for(int count=0;count<fcount;count++)
+	if(theApp.m_KeepSorted[list])
 	{
-		fwprintf(fout,L"%s\n",(LPCWSTR)m_List_Old.GetItemText(count,0));
-	}
-
-	fclose(fout);
-
-	return;
-}
-
-void CWCopyfindDlg::OnClearSelectionOld()
-{
-	int nItem;
-	POSITION pos;
-
-	while(TRUE)
-	{
-		pos = m_List_Old.GetFirstSelectedItemPosition();
-		if(pos == NULL) break;
-		nItem = m_List_Old.GetNextSelectedItem(pos);
-		m_List_Old.DeleteItem(nItem);
-	}
-	
-	return;
-}
-
-void CWCopyfindDlg::OnClearAllOld()
-{
-	m_List_Old.DeleteAllItems();	
-}
-
-void CWCopyfindDlg::OnLoadFromFileNew()
-{
-	FILE *fin;
-	CString szExtension = L"txt";
-	static wchar_t BASED_CODE szFilter[] = L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
-
-	while(true)
-	{
-		CFileDialog ifiledlg(TRUE,szExtension,NULL,OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_FILEMUSTEXIST,szFilter);
-		if(ifiledlg.DoModal() != IDOK)
+		std::vector<std::pair<CString, bool>> items;
+		for(size_t i = 0; i < docs.size(); i++) items.push_back({docs[i], selected[i]});
+		std::stable_sort(items.begin(), items.end(), [](const auto& a, const auto& b) { return NaturalLess(a.first, b.first); });
+		for(size_t i = 0; i < items.size(); i++)
 		{
-			return;
+			docs[i] = items[i].first;
+			selected[i] = items[i].second;
 		}
-		_wfopen_s(&fin,ifiledlg.GetPathName(),L"r");
-		if(fin != NULL) break;
 	}
+	RefreshList(list, selected);
 
-	wchar_t sstring[256];
-	
-	while(fgetws(sstring,255,fin) != NULL)
+	if(paths.size() > 0 && files.empty()) SetDlgItemText(IDC_STATIC_STATUS, L"No documents were found there.");
+	else if(added > 0)
 	{
-		sstring[wcslen(sstring)-1]=0;		// bump out the end-of-line character
-		LVFINDINFO lvInfo;
-		lvInfo.flags = LVFI_STRING;
-		lvInfo.psz = sstring;
-
-		if(m_List_New.FindItem(&lvInfo, -1) != -1)
-			continue;
-		
-		m_List_New.InsertItem(m_List_New.GetItemCount(),sstring);
+		CString status;
+		status.Format(L"Added %s.", (LPCWSTR)Plural(added, list == NEW_LIST ? L"new document" : L"old document",
+			list == NEW_LIST ? L"new documents" : L"old documents"));
+		SetDlgItemText(IDC_STATIC_STATUS, status);
 	}
-		
-	fclose(fin);
-
-	return;
 }
 
-void CWCopyfindDlg::OnSaveToFileNew()
+void CWCopyfindDlg::RefreshList(int list, const std::vector<bool>& selected)
 {
-	FILE *fout;
-	CString szExtension = L"txt";
-	static wchar_t BASED_CODE szFilter[] = L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
-
-	while(true)
+	CListCtrl& ctrl = List(list);
+	const std::vector<CString>& docs = theApp.m_Documents[list];
+	ctrl.SetRedraw(FALSE);
+	ctrl.DeleteAllItems();
+	int first = -1;
+	for(int i = 0; i < (int)docs.size(); i++)
 	{
-		CFileDialog ifiledlg(FALSE,szExtension,NULL,OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST,szFilter);
-		if(ifiledlg.DoModal() != IDOK)
+		ctrl.InsertItem(i, FileName(docs[i]));
+		ctrl.SetItemText(i, 1, FolderName(docs[i]));
+		if(i < (int)selected.size() && selected[i])
 		{
-			return;
+			ctrl.SetItemState(i, LVIS_SELECTED, LVIS_SELECTED);
+			if(first < 0) first = i;
 		}
-		_wfopen_s(&fout,ifiledlg.GetPathName(),L"w");
-		if(fout != NULL) break;
 	}
+	if(first >= 0) ctrl.EnsureVisible(first, FALSE);
+	ctrl.SetRedraw(TRUE);
 
-	int fcount=m_List_New.GetItemCount();
-
-	for(int count=0;count<fcount;count++)
-	{
-		fwprintf(fout,L"%s\n",(LPCWSTR)m_List_New.GetItemText(count,0));
-	}
-
-	fclose(fout);
-
-	return;
+	SetDlgItemText(list == NEW_LIST ? IDC_STATIC_NEW_COUNT : IDC_STATIC_OLD_COUNT,
+		docs.empty() ? CString() : Plural((int)docs.size(), L"document", L"documents"));
+	FitColumns();
+	UpdateControls();
 }
 
-void CWCopyfindDlg::OnClearSelectionNew()
+std::vector<bool> CWCopyfindDlg::Selected(int list)
 {
-	int nItem;
-	POSITION pos;
+	std::vector<bool> selected(List(list).GetItemCount(), false);
+	for(int i = 0; i < (int)selected.size(); i++) selected[i] = (List(list).GetItemState(i, LVIS_SELECTED) & LVIS_SELECTED) != 0;
+	return selected;
+}
 
-	while(TRUE)
+void CWCopyfindDlg::RemoveSelected(int list)
+{
+	if(m_Running) return;
+	std::vector<bool> selected = Selected(list);
+	std::vector<CString>& docs = theApp.m_Documents[list];
+	int firstRemoved = -1;
+	for(int i = (int)docs.size() - 1; i >= 0; i--)
+		if(i < (int)selected.size() && selected[i])
+		{
+			docs.erase(docs.begin() + i);
+			firstRemoved = i;
+		}
+	if(firstRemoved < 0) return;
+	std::vector<bool> keep(docs.size(), false);
+	if(!docs.empty()) keep[(std::min)(firstRemoved, (int)docs.size() - 1)] = true;	// select a neighbor so Delete can repeat
+	RefreshList(list, keep);
+	List(list).SetFocus();
+}
+
+void CWCopyfindDlg::MoveSelected(int list)
+{
+	std::vector<bool> selected = Selected(list);
+	std::vector<CString> moving;
+	for(size_t i = 0; i < selected.size(); i++) if(selected[i]) moving.push_back(theApp.m_Documents[list][i]);
+	RemoveSelected(list);
+	AddPaths(1 - list, moving, false);
+}
+
+void CWCopyfindDlg::SortList(int list)
+{
+	std::vector<CString>& docs = theApp.m_Documents[list];
+	std::stable_sort(docs.begin(), docs.end(), NaturalLess);
+	RefreshList(list, {});
+}
+
+void CWCopyfindDlg::LoadList(int list)
+{
+	CFileDialog dlg(TRUE, L"txt", nullptr, OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||", this);
+	dlg.m_ofn.lpstrTitle = L"Load a List of Documents";
+	if(dlg.DoModal() != IDOK) return;
+	std::vector<CString> lines = ReadListFile(dlg.GetPathName());
+	std::vector<CString> found;
+	int missing = 0;
+	for(const CString& line : lines)
 	{
-		pos = m_List_New.GetFirstSelectedItemPosition();
-		if(pos == NULL) break;
-		nItem = m_List_New.GetNextSelectedItem(pos);
-		m_List_New.DeleteItem(nItem);
+		if(PathFileExistsW(line)) found.push_back(line);
+		else missing++;
 	}
-	
-	return;
-}
-
-void CWCopyfindDlg::OnClearAll()
-{
-	m_List_New.DeleteAllItems();
-}
-
-void CWCopyfindDlg::OnBnClickedButtonFolder()
-{
-	wchar_t sfoldername[1000];
-	CString sztitle;
-	sztitle=L"Select Reporting Folder";
-		
-	LPBROWSEINFO lpbi;
-	BROWSEINFO pbi;
-
-	pbi.hwndOwner = NULL;
-	pbi.pidlRoot = NULL;
-	pbi.pszDisplayName = sfoldername;
-	pbi.lpszTitle = sztitle;
-	pbi.ulFlags = BIF_USENEWUI;
-	pbi.lpfn = NULL;
-	pbi.lParam = NULL;
-	pbi.iImage = 0;
-
-	LPITEMIDLIST lpitem;
-
-	lpbi= &pbi;
-	lpitem = SHBrowseForFolder(lpbi); 
-
-	if(lpitem==NULL)
+	AddPaths(list, found, false);
+	if(missing > 0)
 	{
+		CString message;
+		message.Format(L"%s in the list could not be found and %s left out.", (LPCWSTR)Plural(missing, L"document", L"documents"),
+			missing == 1 ? L"was" : L"were");
+		AfxMessageBox(message, MB_ICONINFORMATION);
+	}
+}
+
+void CWCopyfindDlg::SaveList(int list)
+{
+	CFileDialog dlg(FALSE, L"txt", list == NEW_LIST ? L"New Documents.txt" : L"Old Documents.txt", OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY,
+		L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||", this);
+	dlg.m_ofn.lpstrTitle = L"Save the List of Documents";
+	if(dlg.DoModal() != IDOK) return;
+	CString text;
+	for(const CString& doc : theApp.m_Documents[list]) text += doc + L"\r\n";
+	if(!WriteTextFile(dlg.GetPathName(), text)) AfxMessageBox(L"The list could not be saved.", MB_ICONWARNING);
+}
+
+void CWCopyfindDlg::OnDropFiles(HDROP hDropInfo)
+{
+	std::vector<CString> paths;
+	UINT count = DragQueryFileW(hDropInfo, 0xFFFFFFFF, nullptr, 0);
+	for(UINT i = 0; i < count; i++)
+	{
+		UINT length = DragQueryFileW(hDropInfo, i, nullptr, 0);
+		CString path;
+		DragQueryFileW(hDropInfo, i, path.GetBuffer(length + 1), length + 1);
+		path.ReleaseBuffer();
+		paths.push_back(path);
+	}
+	POINT point;
+	DragQueryPoint(hDropInfo, &point);
+	DragFinish(hDropInfo);
+	if(m_Running) return;
+
+	int list = NEW_LIST;								// drops land in the old-documents list only when aimed at it
+	CRect oldArea;
+	m_ListOld.GetWindowRect(&oldArea);
+	ScreenToClient(&oldArea);
+	CRect oldLabel;
+	GetDlgItem(IDC_STATIC_OLD)->GetWindowRect(&oldLabel);
+	ScreenToClient(&oldLabel);
+	oldArea.UnionRect(oldArea, oldLabel);
+	oldArea.right += 200;								// include the buttons beside it
+	if(oldArea.PtInRect(point)) list = OLD_LIST;
+	AddPaths(list, paths, false);
+}
+
+void CWCopyfindDlg::OnDocsItemChanged(NMHDR*, LRESULT* pResult)
+{
+	UpdateControls();
+	*pResult = 0;
+}
+
+void CWCopyfindDlg::OnDocsDblClick(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	int list = pNMHDR->idFrom == IDC_LIST_NEW ? NEW_LIST : OLD_LIST;
+	int item = reinterpret_cast<NMITEMACTIVATE*>(pNMHDR)->iItem;
+	if(item >= 0 && item < (int)theApp.m_Documents[list].size())
+		ShellExecuteW(m_hWnd, L"open", theApp.m_Documents[list][item], nullptr, nullptr, SW_SHOWNORMAL);
+	else AddDocuments(list);							// double-clicking empty space adds documents, as before
+	*pResult = 0;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Settings
+
+void CWCopyfindDlg::WriteControls()
+{
+	const CopyfindSettings& s = theApp.m_Settings;
+	SetDlgItemInt(IDC_EDIT_PHRASE, s.PhraseLength);
+	SetDlgItemInt(IDC_EDIT_THRESHOLD, s.WordThreshold);
+	SetDlgItemInt(IDC_EDIT_TOLERANCE, s.MismatchTolerance);
+	CheckDlgButton(IDC_CHECK_IGNORE_CASE, s.IgnoreCase);
+	CheckDlgButton(IDC_CHECK_IGNORE_PUNCTUATION, s.IgnorePunctuation);
+	CheckDlgButton(IDC_CHECK_IGNORE_NUMBERS, s.IgnoreNumbers);
+}
+
+void CWCopyfindDlg::ReadControls()
+{
+	CopyfindSettings& s = theApp.m_Settings;
+	s.PhraseLength = std::clamp((int)GetDlgItemInt(IDC_EDIT_PHRASE), 1, 999);
+	s.WordThreshold = std::clamp((int)GetDlgItemInt(IDC_EDIT_THRESHOLD), 1, 99999);
+	s.MismatchTolerance = std::clamp((int)GetDlgItemInt(IDC_EDIT_TOLERANCE), 0, 9);
+	s.IgnoreCase = IsDlgButtonChecked(IDC_CHECK_IGNORE_CASE) != 0;
+	s.IgnorePunctuation = IsDlgButtonChecked(IDC_CHECK_IGNORE_PUNCTUATION) != 0;
+	s.IgnoreNumbers = IsDlgButtonChecked(IDC_CHECK_IGNORE_NUMBERS) != 0;
+	WriteControls();
+}
+
+void CWCopyfindDlg::OnButtonOptions()
+{
+	ReadControls();
+	COptionsDlg dlg(this);
+	dlg.m_Settings = theApp.m_Settings;
+	dlg.m_Language = theApp.m_Language;
+	dlg.m_ReportFolder = theApp.m_ReportFolder;
+	dlg.m_AutoOpenReport = theApp.m_AutoOpenReport;
+	if(dlg.DoModal() != IDOK) return;
+	theApp.m_Settings = dlg.m_Settings;
+	theApp.m_Language = dlg.m_Language;
+	theApp.m_ReportFolder = dlg.m_ReportFolder;
+	theApp.m_AutoOpenReport = dlg.m_AutoOpenReport;
+	WriteControls();
+	theApp.SaveSettings();
+}
+
+void CWCopyfindDlg::UpdateControls()
+{
+	int newDocs = (int)theApp.m_Documents[NEW_LIST].size();
+	int oldDocs = (int)theApp.m_Documents[OLD_LIST].size();
+	bool canCompare = newDocs >= 2 || (newDocs >= 1 && oldDocs >= 1);
+	GetDlgItem(IDC_BUTTON_REMOVE_NEW)->EnableWindow(!m_Running && m_ListNew.GetSelectedCount() > 0);
+	GetDlgItem(IDC_BUTTON_REMOVE_OLD)->EnableWindow(!m_Running && m_ListOld.GetSelectedCount() > 0);
+	GetDlgItem(IDC_BUTTON_COMPARE)->EnableWindow(m_Running || canCompare);
+	GetDlgItem(IDC_BUTTON_REPORT)->EnableWindow(!m_Running && !m_IndexPath.IsEmpty() && PathFileExistsW(m_IndexPath));
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Comparing
+
+void CWCopyfindDlg::SetRunning(bool running)
+{
+	m_Running = running;
+	for(int id : {IDC_LIST_NEW, IDC_LIST_OLD, IDC_BUTTON_ADD_NEW, IDC_BUTTON_ADD_OLD, IDC_EDIT_PHRASE, IDC_SPIN_PHRASE, IDC_EDIT_THRESHOLD,
+		IDC_SPIN_THRESHOLD, IDC_EDIT_TOLERANCE, IDC_SPIN_TOLERANCE, IDC_CHECK_IGNORE_CASE, IDC_CHECK_IGNORE_PUNCTUATION,
+		IDC_CHECK_IGNORE_NUMBERS, IDC_BUTTON_OPTIONS})
+		GetDlgItem(id)->EnableWindow(!running);
+	SetDlgItemText(IDC_BUTTON_COMPARE, running ? L"&Stop" : L"Co&mpare Documents");
+	m_Progress.SetPos(0);
+	m_Progress.ShowWindow(running ? SW_SHOW : SW_HIDE);
+	UpdateControls();
+}
+
+void CWCopyfindDlg::OnButtonCompare()
+{
+	if(m_Running)
+	{
+		m_Abort = true;
+		SetDlgItemText(IDC_STATIC_STATUS, L"Stopping...");
+		return;
+	}
+	ReadControls();
+	theApp.SaveSettings();
+
+	const std::vector<CString>& newDocs = theApp.m_Documents[NEW_LIST];
+	const std::vector<CString>& oldDocs = theApp.m_Documents[OLD_LIST];
+	if(!(newDocs.size() >= 2 || (newDocs.size() >= 1 && oldDocs.size() >= 1)))
+	{
+		SetDlgItemText(IDC_STATIC_STATUS, L"Add at least two new documents, or one new and one old document.");
 		return;
 	}
 
-    wchar_t szPath[1000];
-	LPWSTR pszPath;
-	pszPath=szPath;
-	SHGetPathFromIDList(lpitem,pszPath);
-	ILFree(lpitem);
-	m_Edit_Folder.SetWindowTextW(szPath);
+	m_Results.clear();
+	m_Removed.clear();
+	m_ListReport.DeleteAllItems();
+
+	m_DuplicateNames.clear();									// file names shared by documents in different folders
+	std::set<std::wstring> seen;
+	for(const std::vector<CString>* docs : {&newDocs, &oldDocs})
+		for(const CString& doc : *docs)
+		{
+			CString lower = FileName(doc);
+			lower.MakeLower();
+			if(!seen.insert(std::wstring(lower)).second) m_DuplicateNames.insert(std::wstring(lower));
+		}
+
+	const CopyfindSettings& s = theApp.m_Settings;
+	m_Compare = std::make_unique<CCompareDocuments>((int)(newDocs.size() + oldDocs.size()));
+	CCompareDocuments& c = *m_Compare;
+	int i = 0;
+	for(const CString& doc : oldDocs)
+	{
+		c.m_pDocs[i].m_szDocumentName = doc;
+		c.m_pDocs[i++].m_DocumentType = DOC_TYPE_OLD;
+	}
+	for(const CString& doc : newDocs)
+	{
+		c.m_pDocs[i].m_szDocumentName = doc;
+		c.m_pDocs[i++].m_DocumentType = DOC_TYPE_NEW;
+	}
+	c.m_PhraseLength = s.PhraseLength;
+	c.m_WordThreshold = s.WordThreshold;
+	c.m_MismatchTolerance = s.MismatchTolerance;
+	c.m_MismatchPercentage = s.MismatchPercentage;
+	c.m_SkipLength = s.SkipLength;
+	c.m_bIgnoreCase = s.IgnoreCase;
+	c.m_bIgnorePunctuation = s.IgnorePunctuation;
+	c.m_bIgnoreOuterPunctuation = s.IgnoreOuterPunctuation;
+	c.m_bIgnoreNumbers = s.IgnoreNumbers;
+	c.m_bSkipLongWords = s.SkipLongWords;
+	c.m_bSkipNonwords = s.SkipNonwords;
+	c.m_bBasic_Characters = s.BasicCharacters;
+	c.m_bBriefReport = s.BriefReport;
+	c.m_szSoftwareName = WCOPYFIND_NAME;
+	c.m_szReportFolder = theApp.m_ReportFolder;
+	m_ReportFolder = theApp.m_ReportFolder;
+	m_IndexPath = m_ReportFolder + L"\\matches.html";
+
+	m_Abort = false;
+	SetRunning(true);
+	SetDlgItemText(IDC_STATIC_STATUS, L"Starting...");
+	m_Worker = std::thread(Work, m_hWnd, m_Compare.get(), &m_Abort, theApp.m_Language);
 }
 
-void CWCopyfindDlg::OnSortOnLoadNew()
+// Function: Work
+// Purpose: Runs on a worker thread: reads the documents, compares every pair that should be compared, and writes
+//			the reports, posting progress and each matching pair to the window. It touches nothing but the
+//			CCompareDocuments object, which the window leaves alone until WU_DONE arrives. A document that can't
+//			be read is left out (and listed in the report) rather than stopping the whole comparison.
+
+void CWCopyfindDlg::Work(HWND hwnd, CCompareDocuments* c, std::atomic<bool>* abort, CString language)
 {
-	m_Sort_On_Load_New = !m_Sort_On_Load_New;
-	long istyles;
-	istyles = GetWindowLong(m_List_New,GWL_STYLE);
-	
-	if( m_Sort_On_Load_New )
+	CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);		// the .doc reader uses COM (IFilter)
+	_wsetlocale(LC_ALL, language);
+	auto post = [hwnd](int percent, const CString& status) { ::PostMessage(hwnd, WU_PROGRESS, percent, (LPARAM)new CString(status)); };
+
+	bool stopped = false;
+	int result = c->SetupReports();
+	if(result == -1)
 	{
-		istyles = istyles | LVS_SORTASCENDING;
+		c->SetupLoading();
+		for(int i = 0; i < c->m_Documents; i++)
+		{
+			if(*abort)
+			{
+				stopped = true;
+				break;
+			}
+			CCompareDocuments::Document* doc = c->m_pDocs + i;
+			post(20 * i / c->m_Documents, L"Reading " + CCompareDocuments::FileNameOf(doc->m_szDocumentName));
+			int loaded = c->LoadDocument(doc);
+			if(loaded > -1)
+			{
+				c->m_Unreadable.push_back({doc->m_szDocumentName, ErrorMessage(loaded)});
+				doc->m_DocumentType = DOC_TYPE_UNDEFINED;		// leave it out of the comparisons
+			}
+		}
+		c->FinishLoading();
+
+		if(!stopped) result = c->SetupComparisons();
+		if(result == -1 && !stopped)
+		{
+			c->SetupProgressReports(DOC_TYPE_OLD, DOC_TYPE_NEW, DOC_TYPE_NEW);
+			for(int l = 0; l < c->m_Documents && result == -1 && !stopped; l++)
+			{
+				c->m_pDocL = c->m_pDocs + l;
+				if(c->m_pDocL->m_DocumentType == DOC_TYPE_UNDEFINED) continue;
+				for(int r = 0; r < l; r++)
+				{
+					c->m_pDocR = c->m_pDocs + r;
+					if(c->m_pDocR->m_DocumentType == DOC_TYPE_UNDEFINED) continue;
+					if(c->m_pDocL->m_DocumentType == DOC_TYPE_OLD && c->m_pDocR->m_DocumentType == DOC_TYPE_OLD) continue;
+					if(*abort)
+					{
+						stopped = true;
+						break;
+					}
+
+					c->ComparePair(c->m_pDocL, c->m_pDocR);
+					if(c->m_Compares % c->m_CompareStep == 0 && c->m_TotalCompares > 0)
+					{
+						CString status;
+						status.Format(L"Compared %lld of %lld pairs", c->m_Compares, c->m_TotalCompares);
+						post(20 + (int)(80.0 * c->m_Compares / c->m_TotalCompares), status);
+					}
+					if(c->m_MatchingWordsPerfect >= c->m_WordThreshold)
+					{
+						result = c->ReportMatchedPair();
+						if(result > -1) break;
+						::PostMessage(hwnd, WU_PAIR, 0, (LPARAM)new CCompareDocuments::PairRecord(c->m_PairRecords.back()));
+					}
+				}
+			}
+			c->FinishComparisons();
+		}
+		post(100, L"Writing the report");
+		int finished = c->FinishReports(stopped);
+		if(result == -1) result = finished;
+	}
+	if(result == -1 && stopped) result = ERR_ABORT;
+	CString message = result > -1 ? ErrorMessage(result) : CString();
+	::PostMessage(hwnd, WU_DONE, (WPARAM)result, (LPARAM)new CString(message));
+	CoUninitialize();
+}
+
+LRESULT CWCopyfindDlg::OnProgress(WPARAM wParam, LPARAM lParam)
+{
+	CString* status = reinterpret_cast<CString*>(lParam);
+	if(m_Running && !m_Abort)
+	{
+		m_Progress.SetPos((int)wParam);
+		SetDlgItemText(IDC_STATIC_STATUS, *status);
+	}
+	delete status;
+	return 0;
+}
+
+LRESULT CWCopyfindDlg::OnPair(WPARAM, LPARAM lParam)
+{
+	CCompareDocuments::PairRecord* record = reinterpret_cast<CCompareDocuments::PairRecord*>(lParam);
+	m_Results.push_back(*record);
+	m_Removed.push_back(false);
+	delete record;
+	AddResultRow((int)m_Results.size() - 1);
+	m_ListReport.EnsureVisible(m_ListReport.GetItemCount() - 1, FALSE);
+	if(m_Results.size() < 50) FitColumns();					// once the scroll bar has appeared, the widths are settled
+	return 0;
+}
+
+LRESULT CWCopyfindDlg::OnDone(WPARAM wParam, LPARAM lParam)
+{
+	CString* message = reinterpret_cast<CString*>(lParam);
+	int result = (int)wParam;
+	if(m_Worker.joinable()) m_Worker.join();
+	SetRunning(false);
+
+	const CCompareDocuments& c = *m_Compare;
+	CString status;
+	if(result > 0)
+	{
+		status = *message;
+		AfxMessageBox(*message, MB_ICONWARNING);
 	}
 	else
 	{
-		istyles = istyles & ~LVS_SORTASCENDING;
+		status.Format(L"%s %s among %d documents (%lld pairs compared).",
+			result == ERR_ABORT ? L"Stopped. Found" : L"Done. Found", (LPCWSTR)Plural((int)c.m_PairRecords.size(), L"matching pair", L"matching pairs"),
+			c.m_Documents - (int)c.m_Unreadable.size(), c.m_Compares);
+		if(!c.m_Unreadable.empty())
+			status += L" " + Plural((int)c.m_Unreadable.size(), L"document", L"documents") + L" couldn't be read (see the report).";
+		if(theApp.m_AutoOpenReport && PathFileExistsW(m_IndexPath)) CWCopyfindApp::OpenInBrowser(m_IndexPath);
 	}
-	SetWindowLong(m_List_New,GWL_STYLE,istyles);
+	SetDlgItemText(IDC_STATIC_STATUS, status);
+	delete message;
+	if(m_SortColumn >= 0) RefillResults();
+	FitColumns();
+	UpdateControls();
+	return 0;
 }
 
-void CWCopyfindDlg::OnSortOnLoadOld()
+void CWCopyfindDlg::StopWorker()
 {
-	m_Sort_On_Load_Old = !m_Sort_On_Load_Old;
-	long istyles;
-	istyles = GetWindowLong(m_List_Old,GWL_STYLE);
-	
-	if( m_Sort_On_Load_Old )
+	m_Abort = true;
+	if(m_Worker.joinable()) m_Worker.join();
+	MSG msg;												// discard what the worker posted, freeing it
+	while(PeekMessage(&msg, m_hWnd, WU_PROGRESS, WU_DONE, PM_REMOVE))
 	{
-		istyles = istyles | LVS_SORTASCENDING;
+		if(msg.message == WU_PAIR) delete reinterpret_cast<CCompareDocuments::PairRecord*>(msg.lParam);
+		else delete reinterpret_cast<CString*>(msg.lParam);
 	}
+	m_Running = false;
+}
+
+CString CWCopyfindDlg::ErrorMessage(int code)
+{
+	switch(code)
+	{
+	case ERR_ABORT: return L"Stopped.";
+	case ERR_CANNOT_ALLOCATE_WORKING_HASH_ARRAY:
+	case ERR_CANNOT_ALLOCATE_HASH_ARRAY:
+	case ERR_CANNOT_ALLOCATE_SORTED_HASH_ARRAY:
+	case ERR_CANNOT_ALLOCATE_SORTED_NUMBER_ARRAY: return L"There isn't enough memory to read the document.";
+	case ERR_CANNOT_CREATE_REPORT_FOLDER: return L"The report folder could not be created. Choose another folder in More Options.";
+	case ERR_CANNOT_OPEN_LOG_FILE:
+	case ERR_CANNOT_OPEN_COMPARISON_REPORT_TXT_FILE:
+	case ERR_CANNOT_OPEN_COMPARISON_REPORT_HTML_FILE:
+	case ERR_CANNOT_OPEN_SIDE_BY_SIDE_HTML_FILE:
+		return L"The report could not be written. Check that you can save files in the report folder (see More Options), "
+			L"and that no report file is open in another program.";
+	case ERR_CANNOT_OPEN_LEFT_DOCUMENT_FILE:
+	case ERR_CANNOT_OPEN_RIGHT_DOCUMENT_FILE: return L"A document could not be reopened to write its part of the report. Was it moved or changed?";
+	case ERR_CANNOT_ACCESS_URL: return L"The web address could not be reached.";
+	case ERR_NO_FILE_OPEN: return L"Software problem: reading from a file that is not open.";
+	case ERR_CANNOT_FIND_FILE: return L"The file could not be found.";
+	case ERR_CANNOT_FIND_FILE_EXTENSION: return L"The file has no extension, so its type can't be determined.";
+	case ERR_BAD_DOCX_FILE: return L"This .docx file can't be read.";
+	case ERR_BAD_PDF_FILE: return L"This .pdf file can't be read. (PDF reading needs pdftotext.exe in the same folder as WCopyfind.exe.)";
+	case ERR_CANNOT_FIND_URL_LINK: return L"The web link could not be found.";
+	case ERR_CANNOT_OPEN_INPUT_FILE: return L"The file can't be opened. It may be damaged, or another program may have it open.";
+	default:
+		CString s;
+		s.Format(L"Error %d occurred.", code);
+		return s;
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Matching pairs
+
+void CWCopyfindDlg::AddResultRow(int index)
+{
+	const CCompareDocuments::PairRecord& r = m_Results[index];
+	CString text;
+	int item = m_ListReport.GetItemCount();
+	text.Format(L"%d", r.Perfect);
+	m_ListReport.InsertItem(item, text);
+	for(int side = 0; side < 2; side++)
+	{
+		int words = side ? r.WordsR : r.WordsL;
+		int percent = words ? (int)(100LL * r.Perfect / words) : 0;
+		if(percent == 0 && r.Perfect > 0) text = L"<1%";
+		else text.Format(L"%d%%", percent);
+		m_ListReport.SetItemText(item, 1 + side, text);
+	}
+	m_ListReport.SetItemText(item, 3, DisplayName(r.PathL));
+	m_ListReport.SetItemText(item, 4, DisplayName(r.PathR));
+	m_ListReport.SetItemData(item, index);
+}
+
+// Function: DisplayName
+// Purpose: A document's file name, with its folder's name in front when another document has the same file name.
+
+CString CWCopyfindDlg::DisplayName(const CString& path) const
+{
+	CString name = FileName(path);
+	CString lower = name;
+	lower.MakeLower();
+	if(m_DuplicateNames.count(std::wstring(lower)) == 0) return name;
+	return FileName(FolderName(path)) + L"\\" + name;
+}
+
+void CWCopyfindDlg::RefillResults()
+{
+	std::vector<int> order(m_Results.size());
+	for(size_t i = 0; i < order.size(); i++) order[i] = (int)i;
+	if(m_SortColumn >= 0)
+	{
+		auto key = [&](int i, int column) -> double
+		{
+			const CCompareDocuments::PairRecord& r = m_Results[i];
+			if(column == 0) return r.Perfect;
+			if(column == 1) return r.WordsL ? double(r.Perfect) / r.WordsL : 0;
+			return r.WordsR ? double(r.Perfect) / r.WordsR : 0;
+		};
+		std::stable_sort(order.begin(), order.end(), [&](int a, int b)
+		{
+			int c;
+			if(m_SortColumn <= 2)
+			{
+				double x = key(a, m_SortColumn), y = key(b, m_SortColumn);
+				c = x < y ? -1 : (x > y ? 1 : 0);
+			}
+			else
+			{
+				const CString& x = m_SortColumn == 3 ? m_Results[a].PathL : m_Results[a].PathR;
+				const CString& y = m_SortColumn == 3 ? m_Results[b].PathL : m_Results[b].PathR;
+				c = StrCmpLogicalW(FileName(x), FileName(y));
+			}
+			return m_SortDescending ? c > 0 : c < 0;
+		});
+	}
+	m_ListReport.SetRedraw(FALSE);
+	m_ListReport.DeleteAllItems();
+	for(int i : order) if(!m_Removed[i]) AddResultRow(i);
+	m_ListReport.SetRedraw(TRUE);
+
+	CHeaderCtrl* header = m_ListReport.GetHeaderCtrl();
+	for(int col = 0; col < header->GetItemCount(); col++)
+	{
+		HDITEM item = {HDI_FORMAT};
+		header->GetItem(col, &item);
+		item.fmt &= ~(HDF_SORTUP | HDF_SORTDOWN);
+		if(col == m_SortColumn) item.fmt |= m_SortDescending ? HDF_SORTDOWN : HDF_SORTUP;
+		header->SetItem(col, &item);
+	}
+}
+
+void CWCopyfindDlg::OnReportColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	int column = reinterpret_cast<NMLISTVIEW*>(pNMHDR)->iSubItem;
+	if(column == m_SortColumn) m_SortDescending = !m_SortDescending;
 	else
 	{
-		istyles = istyles & ~LVS_SORTASCENDING;
+		m_SortColumn = column;
+		m_SortDescending = column <= 2;			// biggest matches first; names alphabetically
 	}
-	SetWindowLong(m_List_Old,GWL_STYLE,istyles);
-}
-
-void CWCopyfindDlg::OnBrowseForDocumentsNew()
-{
-	CString szExtension = L"txt";
-	static wchar_t BASED_CODE szFilter[] = L"All Files (*.*)|*.*||";
-	
-	CFileDialog* ifiledlg;
-	ifiledlg = new CFileDialog(TRUE,szExtension,NULL,OFN_HIDEREADONLY|OFN_FILEMUSTEXIST|OFN_NODEREFERENCELINKS|OFN_ALLOWMULTISELECT,szFilter);
-	std::vector<wchar_t> pstrBuf(10000000);
-	LPWSTR pstr = pstrBuf.data();
-	pstr[0] = L'\0';
-	ifiledlg->m_pOFN->lpstrFile=pstr;
-	ifiledlg->m_pOFN->nMaxFile=10000000;
-	ifiledlg->m_pOFN->lpstrTitle=L"Select New Documents to Include in the Comparison";
-	if(ifiledlg->DoModal() != IDOK)
-	{
-		if(ifiledlg != NULL) {delete ifiledlg; ifiledlg=NULL;}
-		return;
-	}
-
-	CString szpath;
-	POSITION pos;
-	pos=ifiledlg->GetStartPosition();
-
-	while(pos != NULL)
-	{
-		szpath=ifiledlg->GetNextPathName(pos);
-		LVFINDINFO lvInfo;
-		lvInfo.flags = LVFI_STRING;
-		lvInfo.psz = szpath;
-		if(m_List_New.FindItem(&lvInfo, -1) != -1)
-			continue;
-
-		m_List_New.InsertItem(m_List_New.GetItemCount(),szpath);
-	}
-	if(ifiledlg != NULL) {delete ifiledlg; ifiledlg=NULL;}
-	return;
-}
-
-void CWCopyfindDlg::OnBrowseForDocumentsOld()
-{
-	CString szExtension = L"txt";
-	static wchar_t BASED_CODE szFilter[] = L"All Files (*.*)|*.*||";
-	
-	CFileDialog* ifiledlg=NULL;
-	ifiledlg = new CFileDialog(TRUE,szExtension,NULL,OFN_HIDEREADONLY|OFN_FILEMUSTEXIST|OFN_NODEREFERENCELINKS|OFN_ALLOWMULTISELECT,szFilter);
-	std::vector<wchar_t> pstrBuf(10000000);
-	LPWSTR pstr = pstrBuf.data();
-	pstr[0] = L'\0';
-	ifiledlg->m_pOFN->lpstrFile=pstr;
-	ifiledlg->m_pOFN->nMaxFile=10000000;
-	ifiledlg->m_pOFN->lpstrTitle=L"Select Old Documents to Include in the Comparison";
-	if(ifiledlg->DoModal() != IDOK)
-	{
-		if(ifiledlg != NULL) {delete ifiledlg; ifiledlg=NULL;}
-		return;
-	}
-
-	CString szpath;
-	POSITION pos;
-	pos=ifiledlg->GetStartPosition();
-
-	while(pos != NULL)
-	{
-		szpath=ifiledlg->GetNextPathName(pos);
-		LVFINDINFO lvInfo;
-		lvInfo.flags = LVFI_STRING;
-		lvInfo.psz = szpath;
-		if(m_List_Old.FindItem(&lvInfo, -1) != -1)
-			continue;
-		
-		m_List_Old.InsertItem(m_List_Old.GetItemCount(),szpath);
-	}
-	if(ifiledlg != NULL) {delete ifiledlg; ifiledlg=NULL;}
-	return;
-}
-
-void CWCopyfindDlg::OnNMDblclkListOld(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	OnBrowseForDocumentsOld();
+	RefillResults();
 	*pResult = 0;
 }
 
-void CWCopyfindDlg::OnNMDblclkListNew(NMHDR *pNMHDR, LRESULT *pResult)
+void CWCopyfindDlg::OpenPair(int item)
 {
-	OnBrowseForDocumentsNew();
+	if(item < 0 || item >= m_ListReport.GetItemCount()) return;
+	const CCompareDocuments::PairRecord& r = m_Results[m_ListReport.GetItemData(item)];
+	CString page = m_ReportFolder + L"\\" + r.File;
+	page.Replace(L'/', L'\\');
+	if(PathFileExistsW(page)) CWCopyfindApp::OpenInBrowser(page);
+	else SetDlgItemText(IDC_STATIC_STATUS, L"That pair's page is no longer in the report folder. Compare the documents again to rebuild it.");
+}
+
+void CWCopyfindDlg::OnReportDblClick(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	OpenPair(reinterpret_cast<NMITEMACTIVATE*>(pNMHDR)->iItem);
 	*pResult = 0;
 }
 
-void CWCopyfindDlg::OnLvnKeydownListOld(NMHDR *pNMHDR, LRESULT *pResult)
+void CWCopyfindDlg::OnButtonReport()
 {
-	LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
-	int key=pLVKeyDow->wVKey;
-	if(key == 0x2E)
+	if(!m_IndexPath.IsEmpty() && PathFileExistsW(m_IndexPath)) CWCopyfindApp::OpenInBrowser(m_IndexPath);
+}
+
+void CWCopyfindDlg::SaveResults()
+{
+	CFileDialog dlg(FALSE, L"txt", L"Matching Pairs.txt", OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY, L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||", this);
+	dlg.m_ofn.lpstrTitle = L"Save the List of Matching Pairs";
+	if(dlg.DoModal() != IDOK) return;
+	CString text = L"Matching words\t% of A\t% of B\tWords in matching phrases (A)\tWords in matching phrases (B)\tDocument A\tDocument B\r\n";
+	for(int item = 0; item < m_ListReport.GetItemCount(); item++)
 	{
-		OnClearSelectionOld();
+		const CCompareDocuments::PairRecord& r = m_Results[m_ListReport.GetItemData(item)];
+		CString line;
+		line.Format(L"%d\t%d\t%d\t%d\t%d\t%s\t%s\r\n", r.Perfect, r.WordsL ? (int)(100LL * r.Perfect / r.WordsL) : 0,
+			r.WordsR ? (int)(100LL * r.Perfect / r.WordsR) : 0, r.TotalL, r.TotalR, (LPCWSTR)r.PathL, (LPCWSTR)r.PathR);
+		text += line;
 	}
-	*pResult = 0;
+	if(!WriteTextFile(dlg.GetPathName(), text)) AfxMessageBox(L"The list could not be saved.", MB_ICONWARNING);
 }
 
-void CWCopyfindDlg::OnLvnKeydownListNew(NMHDR *pNMHDR, LRESULT *pResult)
+void CWCopyfindDlg::OnReportCommand(UINT id)
 {
-	LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
-	int key=pLVKeyDow->wVKey;
-	if(key == 0x2E)
+	switch(id)
 	{
-		OnClearSelectionNew();
+	case ID_REPORT_OPEN: OpenPair(m_ListReport.GetNextItem(-1, LVNI_SELECTED)); break;
+	case ID_REPORT_INDEX: OnButtonReport(); break;
+	case ID_REPORT_SAVE: SaveResults(); break;
+	case ID_REPORT_REMOVE:
+		for(int item = m_ListReport.GetItemCount() - 1; item >= 0; item--)
+			if(m_ListReport.GetItemState(item, LVIS_SELECTED) & LVIS_SELECTED)
+			{
+				m_Removed[m_ListReport.GetItemData(item)] = true;
+				m_ListReport.DeleteItem(item);
+			}
+		break;
+	case ID_REPORT_CLEAR:
+		m_Results.clear();
+		m_Removed.clear();
+		m_ListReport.DeleteAllItems();
+		break;
 	}
-	*pResult = 0;
-}
-
-void CWCopyfindDlg::OnSaveToFileReport()
-{
-	FILE *fout;
-	CString szExtension = L"txt";
-	static wchar_t BASED_CODE szFilter[] = L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
-
-	while(true)
-	{
-		CFileDialog ifiledlg(FALSE,szExtension,NULL,OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST,szFilter);
-		if(ifiledlg.DoModal() != IDOK)
-		{
-			return;
-		}
-		_wfopen_s(&fout,ifiledlg.GetPathName(),L"w");
-		if(fout != NULL) break;
-	}
-
-	int fcount=m_List_Report.GetItemCount();
-
-	for(int count=0;count<fcount;count++)
-	{
-		fwprintf(fout,L"%s\t%s\t%s\t%s\n",
-			(LPCWSTR)m_List_Report.GetItemText(count,0),
-			(LPCWSTR)m_List_Report.GetItemText(count,1),
-			(LPCWSTR)m_List_Report.GetItemText(count,2),
-			(LPCWSTR)m_List_Report.GetItemText(count,3));
-	}
-
-	fclose(fout);
-
-	return;
-}
-
-void CWCopyfindDlg::OnClearSelectionReport()
-{
-	int nItem;
-	POSITION pos;
-
-	while(TRUE)
-	{
-		pos = m_List_Report.GetFirstSelectedItemPosition();
-		if(pos == NULL) break;
-		nItem = m_List_Report.GetNextSelectedItem(pos);
-		m_List_Report.DeleteItem(nItem);
-	}
-	
-	return;
-}
-
-void CWCopyfindDlg::OnClearAllReport()
-{
-	m_List_Report.DeleteAllItems();	
-}
-
-void CWCopyfindDlg::OnLvnKeydownListReport(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
-	int key=pLVKeyDow->wVKey;
-	if(key == 0x2E)
-	{
-		OnClearSelectionReport();
-	}
-	*pResult = 0;
-}
-
-void CWCopyfindDlg::OnViewReportInBrowser()
-{
-	CString szfolder;
-	m_Edit_Folder.GetWindowText(szfolder);
-	CString szbrowser;
-	szbrowser.Format(L"%s%s",szfolder,L"/matches.html");
-
-	HINSTANCE hinst1 = ShellExecute(NULL, // no parent hwnd
-        NULL, // open
-        szbrowser, // file name
-        NULL, // no parameters
-        NULL, // no directory name
-        SW_SHOWNORMAL); // yes, show it
-}
-
-
-BOOL CAboutDlg::OnInitDialog()
-{
-	CDialogEx::OnInitDialog();
-
-	m_Edit_About.SetWindowText(L"This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.\r\n\r\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\r\n\r\nYou should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.\r\n\r\nLouis A. Bloomfield, Department of Physics, University of Virginia\r\n382 McCormick Road, P.O. Box 400714, Charlottesville, VA 22904-4714\r\nemail: bloomfield@virginia.edu\r\nweb site: www.plagiarism.phys.virginia.edu \r\n            (see this web site for latest version of copyfind)\r\n\r\nIf you significantly improve this program, please let me know about it and I will consider distributing your version from my web site.\r\n\r\n\tThanks to:\r\n\r\n\tHandling of dropped files obtained from:\r\n\t\tCFileDropListCtrl, 2000 Stuart Carter\r\n\tHandling of dropped files modified from:\r\n\t\tCDropEdit, 1997 Chris Losinger\r\n\t\thttp://www.codeguru.com/editctrl/filedragedit.shtml\r\n\tShortcut expansion code modified from:\r\n\t\tCShortcut, 1996 Rob Warner\r\n\tThreading code structure thanks to:\r\n\t\tLenop, 2002 Clemons Schmidt\r\n\t\thttp://www.codeguru.com/misc/lenop.html");
-	m_Edit_About.SetReadOnly(TRUE);
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
 }

@@ -20,6 +20,7 @@
 #define ERR_CANNOT_OPEN_RIGHT_HTML_FILE 17
 #define ERR_CANNOT_OPEN_RIGHT_DOCUMENT_FILE 18
 #define ERR_CANNOT_OPEN_SIDE_BY_SIDE_HTML_FILE 19
+#define ERR_CANNOT_CREATE_REPORT_FOLDER 20
 
 #define WORD_UNMATCHED -1
 #define WORD_PERFECT 0
@@ -27,6 +28,10 @@
 #define WORD_FILTERED 2
 
 #define DOC_TYPE_UNDEFINED 0
+#define DOC_TYPE_OLD 1
+#define DOC_TYPE_NEW 2
+
+class CInputDocument;
 
 class CCompareDocuments
 {
@@ -43,24 +48,36 @@ public:
 		int *m_pSortedWordNumber;					// a pointer to the sorted word number list
 		int m_WordsTotal;							// an entry for the number of words in the lists
 		int m_FirstHash;							// an entry for the first word with more than 3 chars
+		bool m_bLoaded;								// false if the document couldn't be read
+	};
+
+	struct PairRecord								// one matching pair, as listed in the report and the window
+	{
+		int Number;									// 1-based pair number, which also names the pair's page
+		int Perfect;								// perfectly matching words
+		int TotalL, TotalR;							// words in matching phrases, perfect or not, in each document
+		int WordsL, WordsR;							// words in each document
+		int Passages;								// number of matching phrases
+		CString PathL, PathR;						// full document names
+		CString File;								// the pair's page, relative to the report folder
 	};
 
 private:
-	int DocumentToHtml(CInputDocument indoc, int *MatchMark, int *MatchAnchor, long words, const wchar_t* href);
+	void DocumentToHtml(CInputDocument& indoc, const int *MatchMark, const int *MatchAnchor, long words, wchar_t side, std::wstring& out);
 	int PercentMatching(int FirstL,int FirstR,int LastL,int LastR,int perfectmatches);
-	void PrintWCharAsHtmlUTF8(FILE *outputFile,wchar_t wc);
 public:
 	int LoadDocument(Document *inDocument);
 	int ComparePair(Document *DocL,Document *DocR);
 	int ComparePairFiltered(Document *DocL,Document *DocR,Document *DocF);
 	int SetupReports();
-	void FinishReports();
+	int FinishReports(bool stopped);
 	void SetupLoading();
 	void FinishLoading();
 	void SetupProgressReports(int Group1,int Group2,int Group3);
 	int SetupComparisons();
 	int ReportMatchedPair();
 	void FinishComparisons();
+	static CString FileNameOf(const CString& path);
 
 	struct Document (*m_pDocs);	// the pointer to all the documents
 	struct Document (*m_pDocL); // pointer to the Left document
@@ -68,10 +85,11 @@ public:
 	int m_Documents; // number of documents
 	CString m_szDocL;		// name of left document
 	CString m_szDocR;		// name of right document
+	std::vector<PairRecord> m_PairRecords;			// every matching pair reported so far
+	std::vector<std::pair<CString, CString>> m_Unreadable;	// documents that couldn't be read, and why
+	CString m_szIndexPath;							// full path of matches.html
 private:
 	FILE *m_fMatch;							// handle for comparisons that exceed threshold (output)
-	FILE *m_fMatchHtml;						// handle for comparisons that exceed threshold (output) - html
-	FILE *m_fHtml;							// handle for output html files
 	FILE *m_fLog;							// handle for the log file
 	bool m_debug;							// flag to include debug output in log file
 	std::vector<int> m_MatchMarkL,m_MatchMarkR;		// left and right matched word markup list
@@ -80,6 +98,7 @@ private:
 	unsigned long *m_pQWordHash;			// a pointer to a working hash-coded word list
 	unsigned long *m_pXWordHash;			// a pointer to a temporary hash-coded word list
 	int m_WordsAllocated;					// number of words allocated in the many word-related arrays
+	int m_Anchors;							// number of matching phrases in the last comparison
 public:
 	int m_MatchingWordsPerfect;				// count of words that are perfect matches
 	int m_MatchingWordsTotalL;				// count of words in left document that are in matching phrases, whether each word is a perfect match or not

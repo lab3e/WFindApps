@@ -23,12 +23,14 @@
 			(m_pDocs+i)->m_pWordHash=NULL;
 			(m_pDocs+i)->m_pSortedWordHash=NULL;
 			(m_pDocs+i)->m_pSortedWordNumber=NULL;
+			(m_pDocs+i)->m_WordsTotal=0;
+			(m_pDocs+i)->m_FirstHash=0;
+			(m_pDocs+i)->m_bLoaded=false;
 		}
 
 		m_fMatch=NULL;
-		m_fMatchHtml=NULL;
-		m_fHtml=NULL;
 		m_fLog=NULL;
+		m_Anchors=0;
 		m_debug=false;
 
 		m_WordsAllocated=0;
@@ -74,8 +76,6 @@
 		}
 
 		if(m_fMatch != NULL) {fclose(m_fMatch); m_fMatch=NULL;}			// close matches file
-		if(m_fMatchHtml != NULL) {fclose(m_fMatchHtml); m_fMatchHtml=NULL;}	// close matches file - html
-		if(m_fHtml != NULL)  {fclose(m_fHtml); m_fHtml=NULL;}	// close html output file
 		if(m_fLog != NULL)  {fclose(m_fLog); m_fLog=NULL;}	// close log file
 
 		if(m_pQWordHash != NULL) {delete [] m_pQWordHash; m_pQWordHash=NULL;}	// if allocated, delete temporary hash-coded word list
@@ -96,7 +96,7 @@ int CCompareDocuments::LoadDocument(Document *inDocument)
 	indoc.m_fLog = m_fLog;								// inform the input document about where the log file is
 	indoc.m_debug = m_debug;							// inform the input document about the debug choice
 
-	fwprintf(m_fLog,L"Loading %s\n",inDocument->m_szDocumentName);
+	fwprintf(m_fLog,L"Loading %s\n",(LPCWSTR)inDocument->m_szDocumentName);
 	fflush(m_fLog);
 
 	iReturn = indoc.OpenDocument(inDocument->m_szDocumentName); // open the next document for word input
@@ -176,6 +176,7 @@ int CCompareDocuments::LoadDocument(Document *inDocument)
 	}
 
 	indoc.CloseDocument();										// close this document
+	inDocument->m_bLoaded = true;
 	return -1;
 }
 
@@ -510,10 +511,11 @@ int CCompareDocuments::ComparePair(Document *DocL,Document *DocR)
 		WordNumberR=WordNumberRedundantR + 1;			// continue searching after the last redundant word on right
 	}
 
+	m_Anchors=Anchor;									// remember how many matching phrases were found
 	m_Compares++;										// increment count of comparisons
 	if( (m_Compares%m_CompareStep)	== 0 )				// if count is divisible by 1000,
 	{
-		fwprintf(m_fLog,L"Comparing Documents, %d Completed\n",m_Compares);
+		fwprintf(m_fLog,L"Comparing Documents, %lld Completed\n",m_Compares);
 		fflush(m_fLog);
 	}
 	return -1;
@@ -1077,189 +1079,13 @@ int CCompareDocuments::ComparePairFiltered(Document *DocL,Document *DocR,Documen
 		WordNumberR=WordNumberRedundantR + 1;			// continue searching after the last redundant word on right
 	}
 
+	m_Anchors=Anchor;									// remember how many matching phrases were found
 	m_Compares++;										// increment count of comparisons
 	if( (m_Compares%m_CompareStep)	== 0 )				// if count is divisible by 1000,
 	{
-		fwprintf(m_fLog,L"Comparing Documents, %d Completed\n",m_Compares);
+		fwprintf(m_fLog,L"Comparing Documents, %lld Completed\n",m_Compares);
 		fflush(m_fLog);
 	}
-	return -1;
-}
-
-int	CCompareDocuments::SetupReports()
-{
-	CString szfilename;									// file names
-
-	m_StartTicks=clock();								// get initial processor clock ticks
-
-    szfilename.Format(L"%s\\log.txt",m_szReportFolder);
-	_wfopen_s(&m_fLog, szfilename, L"w");				// create and open log text file
-	if(m_fLog == NULL) return ERR_CANNOT_OPEN_LOG_FILE;
-	fwprintf(m_fLog,L"Starting Report Files\n");
-
-	szfilename.Format(L"%s\\matches.txt",m_szReportFolder);
-	_wfopen_s(&m_fMatch, szfilename, L"w");				// create and open main comparison report text file
-	if(m_fMatch == NULL) return ERR_CANNOT_OPEN_COMPARISON_REPORT_TXT_FILE;
-
-	szfilename.Format(L"%s\\matches.html",m_szReportFolder);
-	_wfopen_s(&m_fMatchHtml, szfilename, L"w");			// create and open main comparison report html file
-	if(m_fMatchHtml == NULL) return ERR_CANNOT_OPEN_COMPARISON_REPORT_HTML_FILE;
-	
-	fwprintf(m_fMatchHtml,L"<html><title>File Comparison Report</title><body><H2>File Comparison Report</H2>\n");
-	fwprintf(m_fMatchHtml,L"<H3>Produced by %s with These Settings:</H3><br><blockquote>Shortest Phrase to Match: %d\n",m_szSoftwareName,m_PhraseLength);
-	fwprintf(m_fMatchHtml,L"<br>Fewest Matches to Report: %d\n",m_WordThreshold);
-	if(m_bIgnorePunctuation) fwprintf(m_fMatchHtml,L"<br>Ignore Punctuation: Yes\n");
-	else fwprintf(m_fMatchHtml,L"<br>Ignore Punctuation: No\n");
-	if(m_bIgnoreOuterPunctuation) fwprintf(m_fMatchHtml,L"<br>Ignore Outer Punctuation: Yes\n");
-	else fwprintf(m_fMatchHtml,L"<br>Ignore Outer Punctuation: No\n");
-	if(m_bIgnoreNumbers) fwprintf(m_fMatchHtml,L"<br>Ignore Numbers: Yes\n");
-	else fwprintf(m_fMatchHtml,L"<br>Ignore Numbers: No\n");
-	if(m_bIgnoreCase) fwprintf(m_fMatchHtml,L"<br>Ignore Letter Case: Yes\n");
-	else fwprintf(m_fMatchHtml,L"<br>Ignore Letter Case: No\n");
-	if(m_bSkipNonwords) fwprintf(m_fMatchHtml,L"<br>Skip Non-Words: Yes\n");
-	else fwprintf(m_fMatchHtml,L"<br>Skip Non-Words: No\n");
-	if(m_bSkipLongWords) fwprintf(m_fMatchHtml,L"<br>Skip Words Longer Than %d Characters: Yes\n",m_SkipLength);
-	else fwprintf(m_fMatchHtml,L"<br>Skip Long Words: No\n");
-	fwprintf(m_fMatchHtml,L"<br>Most Imperfections to Allow: %d\n",m_MismatchTolerance);
-	fwprintf(m_fMatchHtml,L"<br>Minimum %% of Matching Words: %d\n",m_MismatchPercentage);
-	fwprintf(m_fMatchHtml,L"</blockquote><br><br><table border='1' cellpadding='5'><tr><td align='center'>Perfect Match</td><td align='center'>Overall Match</td><td align='center'>View Both Files</td><td align='center'>File L</td><td align='center'>File R</td></tr>");
-	return -1;
-}
-
-void CCompareDocuments::FinishReports()
-{
-	fwprintf(m_fLog,L"Finishing Report Files\n");
-	fwprintf(m_fMatchHtml,L"</table>\n");
-	if(m_MatchingDocumentPairs == 0) fwprintf(m_fMatchHtml,L"<br>%s found no matching pairs of documents.<br>You may want to lower the thresholds for matching and try again.<br>\n",m_szSoftwareName);
-	else fwprintf(m_fMatchHtml,L"<br>%s found %d matching pairs of documents.<br>\n",m_szSoftwareName,m_MatchingDocumentPairs);
-	fwprintf(m_fMatchHtml,L"</body></html>\n");
-	fclose(m_fMatchHtml); m_fMatchHtml=NULL;
-
-	m_Time=float((clock()-m_StartTicks)*(1.0/CLOCKS_PER_SEC));
-	fwprintf(m_fLog,L"Done. Total CPU Time: %.3f seconds\n",m_Time);
-	fclose(m_fLog); m_fLog=NULL;
-	return;
-}
-
-int	CCompareDocuments::ReportMatchedPair()
-{
-	std::wstring hrefL,hrefR;							// href for the Left and Right html files
-	std::wstring hrefB;									// href from frame file for side-by-side viewing
-
-	CInputDocument indoc;								// CInputDocument class to handle inputting the document
-	indoc.m_bBasic_Characters = m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
-
-	int iReturn;
-
-	// report number of matching words in the Match and Log files
-	fwprintf(m_fMatch,L"%d\t%d\t%d\t%s\t%s\n",m_MatchingWordsPerfect,m_MatchingWordsTotalL,m_MatchingWordsTotalR,m_pDocL->m_szDocumentName,m_pDocR->m_szDocumentName);
-	fwprintf(m_fLog,L"Match: %d\t%d\t%d\t%s\t%s\n",m_MatchingWordsPerfect,m_MatchingWordsTotalL,m_MatchingWordsTotalR,m_pDocL->m_szDocumentName,m_pDocR->m_szDocumentName);
-	fflush(m_fLog);
-
-	int Backslash;
-	int Length;
-
-	Backslash = m_pDocL->m_szDocumentName.ReverseFind('\\');
-	Length = m_pDocL->m_szDocumentName.GetLength();
-	if(Backslash == -1) m_szDocL = m_pDocL->m_szDocumentName;
-	else m_szDocL = m_pDocL->m_szDocumentName.Right(Length - Backslash - 1);
-
-	Backslash = m_pDocR->m_szDocumentName.ReverseFind('\\');
-	Length = m_pDocR->m_szDocumentName.GetLength();
-	if(Backslash == -1) m_szDocR = m_pDocR->m_szDocumentName;
-	else m_szDocR = m_pDocR->m_szDocumentName.Right(Length - Backslash - 1);
-
-	hrefL = std::wstring((LPCWSTR)m_szDocL) + L"." + std::wstring((LPCWSTR)m_szDocR) + L".html";	// generate name for left html filename
-	hrefR = std::wstring((LPCWSTR)m_szDocR) + L"." + std::wstring((LPCWSTR)m_szDocL) + L".html";	// generate name for right html filename
-
-	wchar_t dnumBuf[20];
-	_itow_s(m_MatchingDocumentPairs, dnumBuf, 10);
-	std::wstring szDocRStr = std::wstring((LPCWSTR)m_szDocR);
-	std::wstring szDocLStr = std::wstring((LPCWSTR)m_szDocL);
-	hrefB = std::wstring(L"SBS.") + szDocRStr.substr(0, 8) + L"." + szDocLStr.substr(0, 8) + L"." + dnumBuf + L".html";	// generate name for side-by-side frame filename
-
-	CString szPerfectMatch;
-	CString szOverallMatch;
-
-	szPerfectMatch.Format(L"%d (%d%% L, %d%% R)",m_MatchingWordsPerfect,100*m_MatchingWordsPerfect/m_pDocL->m_WordsTotal,100*m_MatchingWordsPerfect/m_pDocR->m_WordsTotal);
-	szOverallMatch.Format(L"%d (%d%%) L; %d (%d%%) R",m_MatchingWordsTotalL,100*m_MatchingWordsTotalL/m_pDocL->m_WordsTotal,m_MatchingWordsTotalR,100*m_MatchingWordsTotalR/m_pDocR->m_WordsTotal);
-	fwprintf(m_fMatchHtml,
-		L"<tr><td>%s</td><td>%s</td><td><a href=\"%s\" target=\"_blank\">Side-by-Side</a></td><td><a href=\"%s\" target=\"_blank\">%s</a></td><td><a href=\"%s\" target=\"_blank\">%s</a></td></tr>\n",
-		szPerfectMatch, szOverallMatch, hrefB.c_str(), hrefL.c_str(), m_szDocL, hrefR.c_str(), m_szDocR	);
-
-	std::wstring dstring = std::wstring((LPCWSTR)m_szReportFolder) + L"\\" + hrefL;	// generate full path for left html file
-	_wfopen_s(&m_fHtml,dstring.c_str(),L"w"); 			// create and open left html file
-	if(m_fHtml == NULL)	return ERR_CANNOT_OPEN_LEFT_HTML_FILE;
-
-	// create header material for left html file
-
-	fwprintf(m_fHtml,L"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
-	fwprintf(m_fHtml,L"<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
-	fwprintf(m_fHtml,L"<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n");
-	fwprintf(m_fHtml,L"<title>Comparison of %s with %s (Matched Words = %d)</title>\n",m_szDocL,m_szDocR,m_MatchingWordsPerfect);
-	fwprintf(m_fHtml,L"<base target='right'>\n");
-	fwprintf(m_fHtml,L"</head>\n");
-	fwprintf(m_fHtml,L"<body>\n");
-	
-	iReturn = indoc.OpenDocument(m_pDocL->m_szDocumentName);	// open left document for word input
-	if(iReturn > -1)
-	{
-		indoc.CloseDocument();							// close document
-		return iReturn;
-	}
-				
-	// generate text body of html file, with matching words underlined
-
-	iReturn = DocumentToHtml(indoc,m_MatchMarkL.data(),m_MatchAnchorL.data(),m_pDocL->m_WordsTotal,hrefR.c_str()); if(iReturn > -1) return iReturn;
-	indoc.CloseDocument();								// close document
-
-	fwprintf(m_fHtml,L"\n</body></html>\n");				// complete html file
-	fclose(m_fHtml); m_fHtml=NULL;						// close html file
-
-	dstring = std::wstring((LPCWSTR)m_szReportFolder) + L"\\" + hrefR;	// generate full path for right html file
-	_wfopen_s(&m_fHtml,dstring.c_str(),L"w");				// create and open right html file
-	if(m_fHtml == NULL) return ERR_CANNOT_OPEN_RIGHT_HTML_FILE;
-	
-	// create header material for right html file
-
-	fwprintf(m_fHtml,L"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n");
-	fwprintf(m_fHtml,L"<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n");
-	fwprintf(m_fHtml,L"<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\r\n");
-	fwprintf(m_fHtml,L"<title>Comparison of %s with %s (Matched Words = %d)</title>\r\n",m_szDocR,m_szDocL,m_MatchingWordsPerfect);
-	fwprintf(m_fHtml,L"<base target='left'>\r\n");
-	fwprintf(m_fHtml,L"</head>\r\n");
-	fwprintf(m_fHtml,L"<body>\r\n");
-
-	iReturn = indoc.OpenDocument(m_pDocR->m_szDocumentName);	// open right document for word input
-	if(iReturn > -1)
-	{
-		indoc.CloseDocument();							// close document
-		return iReturn;
-	}
-				
-	// generate text body of html file, with matching words underlined
-
-	iReturn = DocumentToHtml(indoc,m_MatchMarkR.data(),m_MatchAnchorR.data(),m_pDocR->m_WordsTotal,hrefL.c_str()); if(iReturn > -1) return iReturn;
-	indoc.CloseDocument();
-
-	fwprintf(m_fHtml,L"\n</body></html>\n");				// complete html file
-	fclose(m_fHtml); m_fHtml=NULL;						// close html file
-
-	dstring = std::wstring((LPCWSTR)m_szReportFolder) + L"\\" + hrefB;	// generate full path for side-by-side file
-	_wfopen_s(&m_fHtml,dstring.c_str(),L"w");				// create and open side-by-side html file
-	if(m_fHtml == NULL) return ERR_CANNOT_OPEN_SIDE_BY_SIDE_HTML_FILE;
-
-	// create side-by-side wrapper html file
-
-	fwprintf(m_fHtml,L"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n");
-	fwprintf(m_fHtml,L"<html><title>Comparison of %s with %s (Matched Words = %d)</title>\n",m_szDocR,m_szDocL,m_MatchingWordsPerfect);
-	fwprintf(m_fHtml,L"<frameset cols=\"*,*\" frameborder=\"YES\" border=\"1\" framespacing=\"0\">");
-	fwprintf(m_fHtml,L"<frame src=\"%s\" name=\"left\">\n",hrefL.c_str());
-	fwprintf(m_fHtml,L"<frame src=\"%s\" name=\"right\">\n",hrefR.c_str());
-	fwprintf(m_fHtml,L"</frameset><body></body></html>");
-
-	fclose(m_fHtml); m_fHtml=NULL;
-
 	return -1;
 }
 
@@ -1321,123 +1147,7 @@ void CCompareDocuments::FinishComparisons()
 	fflush(m_fLog);
 }
 
-// Function: DocumentToHtml
-
-// Purpose: Places the body of the document into the html file that is being generated
-
-// Details: Reads the document in just as it was read in while generating the list of hashed words.
-//			Each word is copied to the html file, but with underlining and paragraph marks inserted where
-//			they are appropriate.
-
-// Description: Tries to produce a readable html file body that has matching words underlined and that breaks
-//				paragraphs where appropriate.
-
-int CCompareDocuments::DocumentToHtml(CInputDocument indoc, int *MatchMark, int *MatchAnchor, long words, const wchar_t* href)
-{
-	int wordcount=0;								// current word number
-
-	wchar_t word[256],tword[256];
-	int DelimiterType=DEL_TYPE_WHITE;
-
-	int xMatch;
-	int xAnchor;
-
-	int LastMatch=WORD_UNMATCHED;
-	int LastAnchor=0;
-
-	int iReturn;
-
-	for(wordcount=0;wordcount<words;wordcount++)	// loop for every word
-	{
-		xMatch=MatchMark[wordcount];
-		xAnchor=MatchAnchor[wordcount];
-
-		if((LastMatch!=xMatch) || (LastAnchor!=xAnchor))	// check for a change of markup or anchor
-		{
-			if(LastMatch==WORD_PERFECT) fwprintf(m_fHtml,L"</font>");	// close out red markups if they were active
-			else if(LastMatch==WORD_FLAW) fwprintf(m_fHtml,L"</font></i>");	// close out green italics if they were active
-			else if(LastMatch==WORD_FILTERED)  fwprintf(m_fHtml,L"</font>");	// close out blue markups if they were active
-
-			if(LastAnchor!=xAnchor)
-			{
-				if(LastAnchor>0)
-				{
-					fwprintf(m_fHtml,L"</a>");	// close out any active anchor
-					LastAnchor=0;
-				}
-				if(xAnchor>0)
-				{
-					if(m_bBriefReport && (wordcount>0) ) fwprintf(m_fHtml,L"</P>\n<P>");	// print a paragraph mark for a new line
-					fwprintf(m_fHtml,L"<a name='%i' href='%s#%i'>",MatchAnchor[wordcount],href,MatchAnchor[wordcount]);	// start new anchor
-				}
-			}
-
-			if(xMatch==WORD_PERFECT) fwprintf(m_fHtml,L"<font color='#FF0000'>");	// start red for perfection
-			else if(xMatch==WORD_FLAW) fwprintf(m_fHtml,L"<i><font color='#007F00'>");	// start green italics for imperfection
-			else if(xMatch==WORD_FILTERED)  fwprintf(m_fHtml,L"<font color='#0000FF'>");	// start blue for filtered
-		}
-
-		LastMatch=xMatch;
-		LastAnchor=xAnchor;
-
-		while(true)
-		{
-			if(DelimiterType == DEL_TYPE_EOF) return -1;			// shouldn't happen unless document changed during scan
-			iReturn = indoc.GetWord(word,DelimiterType); if(iReturn > -1) return iReturn;	// get next word
-
-			wcscpy_s(tword,word);								// copy word to a temporary
-
-			if(m_bIgnorePunctuation) WordRemovePunctuation(tword);	// if ignore punctuation is active, remove punctuation
-			if(m_bIgnoreOuterPunctuation) wordxouterpunct(tword);	// if ignore outer punctuation is active, remove outer punctuation
-			if(m_bIgnoreNumbers) WordRemoveNumbers(tword);			// if ignore numbers is active, remove numbers
-			if(m_bIgnoreCase) WordToLowerCase(tword);			// if ignore case is active, remove case
-			if(m_bSkipLongWords && (wcslen(tword) > m_SkipLength) ) continue;	// if skip too-long words is active, skip them
-			if(m_bSkipNonwords && (!WordCheck(tword)) ) continue;	// if skip nonwords is active, skip them
-
-			break;
-		}
-	
-		if( (!m_bBriefReport) || (xMatch == WORD_PERFECT) || (xMatch == WORD_FLAW) )
-		{
-			size_t wordLength=wcslen(word);						// find length of word
-			for(size_t i=0;i<wordLength;i++) PrintWCharAsHtmlUTF8(m_fHtml,word[i]);			// print the character, using UTF8 translation
-			if(DelimiterType == DEL_TYPE_WHITE) fwprintf(m_fHtml,L" ");					// print a blank for white space
-			else if(DelimiterType == DEL_TYPE_NEWLINE) fwprintf(m_fHtml,L"<br>");			// print a break for a new line
-		}
-	}
-	if(LastMatch==WORD_PERFECT) fwprintf(m_fHtml,L"</font>");	// close out red markups if they were active
-	else if(LastMatch==WORD_FLAW) fwprintf(m_fHtml,L"</font></i>");	// close out green italics if they were active
-	else if(LastMatch==WORD_FILTERED)  fwprintf(m_fHtml,L"</font>");	// close out blue markups if they were active
-	if(LastAnchor>0) fwprintf(m_fHtml,L"</a>");	// close out any active anchor
-	return -1;
-}
-
-void CCompareDocuments::PrintWCharAsHtmlUTF8(FILE *outputFile,wchar_t wc)
-{
-	if( wc == '&' ) fwprintf_s(outputFile,L"&amp;");
-	else if( wc == '<' ) fwprintf_s(outputFile,L"&lt;");
-	else if( (wc & 0xFF80) == 0 )
-	{
-		putc(wc,outputFile);
-		return;
-	}
-	else if( (wc & 0xF800) == 0 )
-	{
-		putc(((wc >> 6) | 0xC0),outputFile);	// put out first byte 110xxxxx
-		putc(((wc & 0x3F) | 0x80),outputFile); // put out second byte 10xxxxxx
-		return;
-	}
-	else
-	{
-		putc(((wc >> 12) | 0xE0),outputFile);	// put out first byte 1110xxxx
-		putc((((wc >> 6) & 0x3F) | 0x80),outputFile); // put out second byte 10xxxxxx
-		putc(((wc & 0x3F) | 0x80),outputFile); // put out third byte 10xxxxxx
-		return;
-	}
-}
-
 int CCompareDocuments::PercentMatching(int FirstL,int FirstR,int LastL,int LastR,int PerfectMatchingWords)
 {
 	return (200*PerfectMatchingWords)/(LastL-FirstL+LastR-FirstR+2);
 }
-

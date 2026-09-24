@@ -97,6 +97,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -121,6 +122,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -146,6 +148,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -174,6 +177,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -193,21 +197,19 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="res\toolbar1.bmp" />
-    <None Include="res\WCopyfind.ico" />
-    <None Include="res\WCopyfind.rc2" />
+    <Image Include="res\WCopyfind.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AbortDlg.h" />
     <ClInclude Include="clib\CompareDocuments.h" />
+    <ClInclude Include="clib\ReportAssets.h" />
+    <ClInclude Include="..\Common\DialogLayout.h" />
+    <ClInclude Include="OptionsDlg.h" />
     <ClInclude Include="..\Common\HeapSort.h" />
     <ClInclude Include="..\Common\InputDocument.h" />
     <ClInclude Include="..\Common\Words.h" />
-    <ClInclude Include="FileDropListCtrl.h" />
-    <ClInclude Include="Resource.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="UiThread.h" />
     <ClInclude Include="WCopyfind.h" />
     <ClInclude Include="WCopyfindDlg.h" />
     <ClInclude Include="..\Common\miniz\miniz.h" />
@@ -217,19 +219,18 @@
     <ClInclude Include="..\Common\miniz\miniz_zip.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AbortDlg.cpp" />
     <ClCompile Include="clib\CompareDocuments.cpp" />
+    <ClCompile Include="clib\CompareReports.cpp" />
+    <ClCompile Include="OptionsDlg.cpp" />
     <ClCompile Include="..\Common\HeapSort.cpp" />
     <ClCompile Include="..\Common\InputDocument.cpp" />
     <ClCompile Include="..\Common\Words.cpp" />
-    <ClCompile Include="FileDropListCtrl.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="UiThread.cpp" />
     <ClCompile Include="WCopyfind.cpp" />
     <ClCompile Include="WCopyfindDlg.cpp" />
     <ClCompile Include="..\Common\miniz\miniz.c" />

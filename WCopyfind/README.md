@@ -1,10 +1,46 @@
-# WCopyfind 5.0.0
+# WCopyfind 6.0.0
 
 WCopyfind is a C++/MFC program for Windows that compares collections of documents to discover if they share phrases. It is used for detecting plagiarism and for finding common passages across large sets of text files.
 
-This version (5.0.0) is a modernization of WCopyfind 4.1.5, a program that had not been significantly edited for over a decade.
+Web site: https://WCopyfind.WFindApps.org
 
-## What's new in 5.0.0
+## What's new in 6.0.0
+
+### A new window
+- Three numbered steps: choose the documents, decide what counts as a match, compare
+- Resizable, with the lists and the results growing to fill the window
+- New and old document lists show each document's name and folder, with a count
+- Documents and whole folders (with their subfolders) can be dropped onto either list; shortcuts are followed
+- **Add Documents** has a drop-down menu (also on right-click) to add a folder, load or save the list, sort it by name (so "paper2" comes before "paper10"), keep it sorted, move documents between the lists, remove them, or clear the list
+- The document lists are remembered between sessions
+- The comparison runs in the background; the **Compare Documents** button becomes **Stop**, and the results appear as they are found
+- The results can be sorted by clicking a column heading; when two documents have the same file name, the results show their folders too
+- Less-used settings (minimum % matching, outer punctuation, non-words, long words, basic characters, language, report folder, brief report, opening the report automatically) and the vocabulary tool are in **More Options**
+- Settings from WCopyfind 5.0.0 and earlier are carried over the first time 6.0.0 runs
+- A document that can't be read is left out and listed, rather than stopping the whole comparison
+- The report folder is created automatically; it defaults to `Documents\WCopyfind Reports`
+
+### New reports
+- `matches.html` lists the matching pairs with how much of each document matches, and can be filtered by name and sorted by any column
+- Each pair has one page (`pairs\pair-00001.html`, …) showing the two documents side by side, each scrolling on its own, replacing the three files per pair and the HTML frames of earlier versions
+- Matching passages are highlighted in the same color in both documents; clicking one brings its twin into view; **Next match** / **Previous match** (or the N and P keys) step through them
+- **Show only paragraphs with matches** hides the rest of the text; the pages also work in dark mode and when printed
+- Words skipped by the filters (non-words, long words) are now shown in the report instead of disappearing from it
+- `matches.txt` keeps its tab-separated format (now written in UTF-8, so file names in any language survive)
+
+### Fixes
+- The first-run defaults for the report folder and language were cut to their first character (`C` and `E`), so a first comparison on a new computer failed
+- Settings and saved lists lost accented and non-English characters
+- **Load from File** cut the last character from a list's final line when the file didn't end with a line break
+- The comparison thread updated the window directly, which Windows does not support
+- Two documents with the same file name in different folders overwrote each other's report pages
+- The vocabulary tool froze the window, ignored the Basic Characters setting, and wrote words in the ANSI code page; it now writes UTF-8, most frequent words first
+- `.doc` files were read by the fallback byte scanner because COM was never initialized on the comparison thread, so the more accurate IFilter reader could not load
+- Format strings passed a `CString` object and a 64-bit count where a pointer and an `int` were expected
+
+## What was new in 5.0.0
+
+5.0.0 was a modernization of WCopyfind 4.1.5, a program that had not been significantly edited for over a decade.
 
 ### Bug fixes (15 total)
 - Replaced undefined-behaviour `HeapSort` (1-before-array pointer) with `std::sort`
@@ -36,21 +72,21 @@ This version (5.0.0) is a modernization of WCopyfind 4.1.5, a program that had n
 ### Toolchain
 - Updated to Visual Studio 2025 (toolset v145), C++20
 
+### Later fix
+- Fixed imperfect-match extension stopping one flaw early when growing a phrase forward (`Flaws == m_MismatchTolerance` instead of `>`), so that "Most Imperfections to Allow" now applies equally in both directions; with a setting of 1, phrases could previously absorb a flaw only at their start
+
 ## Supported file types
 - `.txt` — plain text
 - `.docx` — Word 2007 and later (ZIP/XML, read via miniz)
 - `.doc` — Word 97–2003 (read via IFilter COM, with byte-scan fallback)
-- `.pdf` — PDF (read via pdftotext external tool)
+- `.pdf` — PDF (read via pdftotext external tool, placed beside `WCopyfind.exe`)
 - `.htm` / `.html` — web pages
-- URLs — fetched via WinINet
+- `.url` — internet shortcuts, fetched via WinINet
 
-### Later fixes
-- Fixed imperfect-match extension stopping one flaw early when growing a phrase forward (`Flaws == m_MismatchTolerance` instead of `>`), so that "Most Imperfections to Allow" now applies equally in both directions; with a setting of 1, phrases could previously absorb a flaw only at their start
-
-## Repository layout
-- `WCopyfind\` — this program
-- `WRepeatfind\` — a companion program that finds repeated phrases within one document or book (see its README)
-- `Common\` — code shared by both programs: document reading (`InputDocument`), word filters and hashing (`Words`), sorting (`HeapSort`), and miniz
+## Source files
+- `WCopyfindDlg` — the main window; `OptionsDlg` — More Options and the vocabulary tool; `WCopyfind.cpp` — start-up and settings
+- `clib\CompareDocuments` — the comparison engine; `clib\CompareReports.cpp` — the reports; `clib\ReportAssets.h` — their styles and scripts
+- `..\Common` — document reading, word filters and hashing, sorting, miniz, and the dialog layout helper shared with WRepeatfind
 
 ## Building
 Open `WCopyfind.sln` (in the repository root) in Visual Studio 2022 or later with the **Desktop development with C++** workload and the **MFC** optional component installed. Build the Release x64 configuration. Each program builds into its own `x64\Release` folder.

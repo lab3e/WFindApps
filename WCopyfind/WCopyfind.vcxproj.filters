@@ -1,130 +1,63 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Engine">
+      <UniqueIdentifier>{2B6C1D40-5E3A-4B9C-9F1D-7A8B9C0D1E21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{3C7D2E51-6F4B-4CAD-A02E-8B9CAD1E2F32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\miniz">
+      <UniqueIdentifier>{4D8E3F62-705C-4DBE-B13F-9CADBE2F3043}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\WCopyfind.rc2">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\WCopyfind.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\toolbar1.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
+    <ClInclude Include="clib\CompareDocuments.h"><Filter>Engine</Filter></ClInclude>
+    <ClInclude Include="clib\ReportAssets.h"><Filter>Engine</Filter></ClInclude>
+    <ClInclude Include="..\Common\DialogLayout.h"><Filter>Common</Filter></ClInclude>
+    <ClInclude Include="OptionsDlg.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="..\Common\HeapSort.h"><Filter>Common</Filter></ClInclude>
+    <ClInclude Include="..\Common\InputDocument.h"><Filter>Common</Filter></ClInclude>
+    <ClInclude Include="..\Common\Words.h"><Filter>Common</Filter></ClInclude>
+    <ClInclude Include="resource.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="stdafx.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="targetver.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="WCopyfind.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="WCopyfindDlg.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="..\Common\miniz\miniz.h"><Filter>Common\miniz</Filter></ClInclude>
+    <ClInclude Include="..\Common\miniz\miniz_common.h"><Filter>Common\miniz</Filter></ClInclude>
+    <ClInclude Include="..\Common\miniz\miniz_tdef.h"><Filter>Common\miniz</Filter></ClInclude>
+    <ClInclude Include="..\Common\miniz\miniz_tinfl.h"><Filter>Common\miniz</Filter></ClInclude>
+    <ClInclude Include="..\Common\miniz\miniz_zip.h"><Filter>Common\miniz</Filter></ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WCopyfind.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WCopyfindDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileDropListCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UiThread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AbortDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="clib\CompareDocuments.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\HeapSort.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\InputDocument.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\Words.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\miniz\miniz.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\miniz\miniz_common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\miniz\miniz_tdef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\miniz\miniz_tinfl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\miniz\miniz_zip.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClCompile Include="clib\CompareDocuments.cpp"><Filter>Engine</Filter></ClCompile>
+    <ClCompile Include="clib\CompareReports.cpp"><Filter>Engine</Filter></ClCompile>
+    <ClCompile Include="OptionsDlg.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="..\Common\HeapSort.cpp"><Filter>Common</Filter></ClCompile>
+    <ClCompile Include="..\Common\InputDocument.cpp"><Filter>Common</Filter></ClCompile>
+    <ClCompile Include="..\Common\Words.cpp"><Filter>Common</Filter></ClCompile>
+    <ClCompile Include="stdafx.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="WCopyfind.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="WCopyfindDlg.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="..\Common\miniz\miniz.c"><Filter>Common\miniz</Filter></ClCompile>
+    <ClCompile Include="..\Common\miniz\miniz_tdef.c"><Filter>Common\miniz</Filter></ClCompile>
+    <ClCompile Include="..\Common\miniz\miniz_tinfl.c"><Filter>Common\miniz</Filter></ClCompile>
+    <ClCompile Include="..\Common\miniz\miniz_zip.c"><Filter>Common\miniz</Filter></ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WCopyfind.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WCopyfindDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FileDropListCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UiThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AbortDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="clib\CompareDocuments.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Common\HeapSort.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Common\InputDocument.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Common\Words.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Common\miniz\miniz.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Common\miniz\miniz_tdef.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Common\miniz\miniz_tinfl.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Common\miniz\miniz_zip.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ResourceCompile Include="WCopyfind.rc"><Filter>Resource Files</Filter></ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="WCopyfind.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
+    <Image Include="res\WCopyfind.ico"><Filter>Resource Files</Filter></Image>
   </ItemGroup>
 </Project>

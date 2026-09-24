@@ -1,114 +1,108 @@
-
-// WCopyfindDlg.h : header file
-//
+// WCopyfindDlg.h : the main WCopyfind window
 
 #pragma once
+#include <memory>
+#include <thread>
+#include <atomic>
+#include <vector>
+#include <set>
+#include <string>
+#include "DialogLayout.h"
+#include "clib\CompareDocuments.h"
 
-#include "FileDropListCtrl.h"
-#include "afxwin.h"
-#include "afxcmn.h"
+const UINT WU_PROGRESS = WM_APP + 10;	// wParam = percent, lParam = CString* status (receiver deletes)
+const UINT WU_PAIR = WM_APP + 11;		// lParam = CCompareDocuments::PairRecord* (receiver deletes)
+const UINT WU_DONE = WM_APP + 12;		// wParam = result code, lParam = CString* message (receiver deletes)
 
-// CWCopyfindDlg dialog
 class CWCopyfindDlg : public CDialogEx
 {
-// Construction
 public:
-	CWCopyfindDlg(CWnd* pParent = NULL);	// standard constructor
-
-// Dialog Data
+	CWCopyfindDlg(CWnd* pParent = nullptr);
 	enum { IDD = IDD_WCOPYFIND_DIALOG };
-	CButton	m_Check_Brief_Report;
-	CSpinButtonCtrl	m_Spin_Percentage;
-	CEdit	m_Edit_Percentage;
-	CSpinButtonCtrl	m_Spin_Tolerance;
-	CEdit	m_Edit_Tolerance;
-	CButton	m_Check_Skip_Nonwords;
-	CButton	m_Check_Skip_Long_Words;
-	CButton	m_Check_Ignore_Outer_Punctuation;
-	CButton m_Check_Basic_Characters;
-	CEdit	m_Edit_Skip_Length;
-	CButton	m_Check_Ignore_Punctuation;
-	CButton	m_Check_Ignore_Numbers;
-	CButton	m_Check_Ignore_Case;
-	CEdit	m_Edit_Threshold;
-	CSpinButtonCtrl	m_Spin_Threshold;
-	CProgressCtrl	m_Progress;
-	CStatic	m_Static_Status;
-	CEdit	m_Edit_Folder;
-	CEdit	m_Edit_Phrase;
-	CSpinButtonCtrl	m_Spin_Phrase;
-	CListCtrl	m_List_Report;
-	CFileDropListCtrl	m_List_Old;
-	CFileDropListCtrl	m_List_New;
 
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-
-
-// Implementation
 protected:
-	HICON m_hIcon;
-
-	// Generated message map functions
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+	virtual void OnCancel();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	afx_msg void OnButtonRun();
-	afx_msg void OnCheck_Ignore_Case();
-	virtual void OnOK();
-	afx_msg void OnButtonVocabulary();
-	afx_msg void OnKillfocusEditStringlen();
-	afx_msg void OnKillfocusEditPercentage();
-	afx_msg void OnKillfocusEditTolerance();
-	afx_msg void OnNMDblclkListReport(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMRclickListOld(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
-	afx_msg void OnSaveToFileOld();
-	afx_msg void OnLoadFromFileOld();
-	afx_msg void OnClearSelectionOld();
-	afx_msg void OnClearAllOld();
-	afx_msg void OnNMRclickListNew(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnLoadFromFileNew();
-	afx_msg void OnSaveToFileNew();
-	afx_msg void OnClearSelectionNew();
-	afx_msg void OnClearAll();
-	afx_msg void OnBnClickedButtonFolder();
-	afx_msg void OnSortOnLoadNew();
-	afx_msg void OnSortOnLoadOld();
-	afx_msg void OnBrowseForDocumentsNew();
-	afx_msg void OnBrowseForDocumentsOld();
-	afx_msg void OnNMDblclkListOld(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMDblclkListNew(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnLvnKeydownListOld(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnLvnKeydownListNew(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnSaveToFileReport();
-	afx_msg void OnClearSelectionReport();
-	afx_msg void OnClearAllReport();
-	afx_msg void OnNMRclickListReport(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnLvnKeydownListReport(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnViewReportInBrowser();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
+	afx_msg void OnDropFiles(HDROP hDropInfo);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void OnAddNew();
+	afx_msg void OnAddOld();
+	afx_msg void OnRemoveNew();
+	afx_msg void OnRemoveOld();
+	afx_msg void OnAddDropDown(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnListCommand(UINT id);
+	afx_msg void OnReportCommand(UINT id);
+	afx_msg void OnButtonOptions();
+	afx_msg void OnButtonCompare();
+	afx_msg void OnButtonReport();
+	afx_msg void OnDocsItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDocsDblClick(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnReportDblClick(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnReportColumnClick(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg LRESULT OnProgress(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnPair(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnDone(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
-public:
-
 
 private:
-	void GetRegistryValue(const wchar_t *name,int *value,int valuedefault);
-	void GetRegistrySValue(const wchar_t *name,CString *szvalue,const wchar_t *svaluedefault);
-	void SetRegistryValue(const wchar_t *name,int value);
-	void SetRegistrySValue(const wchar_t *name,const wchar_t *svalue);
-	CImageList m_ImageListOld;
-	CImageList m_ImageListNew;
-	CPoint m_ptMsg;
-	CString m_szMsg;
-	int m_Menu;
-	bool m_Sort_On_Load_New;
-	bool m_Sort_On_Load_Old;
-	void DoComparison( void *pArgument );
-	CDialog *m_pAbortDlg;
-	CUiThread *m_pUiThread;
-	thread_args *m_pargs;
-	LRESULT OnComparisonTerminated(WPARAM, LPARAM);
-public:
-	CComboBox m_Combo_Language;
+	enum { NEW_LIST = 0, OLD_LIST = 1 };
+
+	CListCtrl& List(int list) { return list == NEW_LIST ? m_ListNew : m_ListOld; }
+	void AddDocuments(int list);
+	void AddFolder(int list);
+	void AddPaths(int list, const std::vector<CString>& paths, bool fromFolder);
+	void RefreshList(int list, const std::vector<bool>& selected);
+	std::vector<bool> Selected(int list);
+	void RemoveSelected(int list);
+	void ShowListMenu(int list, CPoint screenPoint);
+	void LoadList(int list);
+	void SaveList(int list);
+	void SortList(int list);
+	void MoveSelected(int list);
+	void ReadControls();
+	void WriteControls();
+	void UpdateControls();
+	void SetRunning(bool running);
+	void AddResultRow(int index);
+	void FitColumns();
+	CString DisplayName(const CString& path) const;
+	void RefillResults();
+	void OpenPair(int item);
+	void SaveResults();
+	void StopWorker();
+	static void Work(HWND hwnd, CCompareDocuments* doc, std::atomic<bool>* abort, CString language);
+	static CString ErrorMessage(int code);
+
+	HICON m_hIcon;
+	CFont m_BoldFont;
+	CDialogLayout m_Layout;
+	CListCtrl m_ListNew;
+	CListCtrl m_ListOld;
+	CListCtrl m_ListReport;
+	CSpinButtonCtrl m_SpinPhrase;
+	CSpinButtonCtrl m_SpinThreshold;
+	CSpinButtonCtrl m_SpinTolerance;
+	CProgressCtrl m_Progress;
+	int m_MenuList = NEW_LIST;				// which document list the open list menu acts on
+
+	std::unique_ptr<CCompareDocuments> m_Compare;
+	std::thread m_Worker;
+	std::atomic<bool> m_Abort{false};
+	bool m_Running = false;
+	CString m_IndexPath;					// the last report's matches.html
+	CString m_ReportFolder;					// the folder the last report was written to
+	std::vector<CCompareDocuments::PairRecord> m_Results;	// every matching pair from the last comparison
+	std::vector<bool> m_Removed;							// pairs the user removed from the list
+	std::set<std::wstring> m_DuplicateNames;				// lowercase file names used by more than one document
+	int m_SortColumn = -1;
+	bool m_SortDescending = false;
 };

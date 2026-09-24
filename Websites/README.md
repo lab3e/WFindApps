@@ -57,19 +57,22 @@ Upload the contents of each `dist/<host name>/` folder to that site's document r
 
 ## Redirects from the old site
 
-Suggested permanent (301) redirects for `plagiarism.bloomfieldmedia.com`:
+`old-site/redirects.htaccess` sends every page and post of the old Plagiarism Resource Site (`plagiarism.bloomfieldmedia.com`) permanently (301) to its new home, so existing links and search rankings carry over. It goes at the top of that site's `.htaccess`, above WordPress's own block. The main pages:
 
 | Old address | New address |
 |---|---|
+| `/` (home) and anything not listed | `https://wcopyfind.wfindapps.org/` |
 | `/software/` | `https://wcopyfind.wfindapps.org/` |
 | `/software/wcopyfind/` | `https://wcopyfind.wfindapps.org/download.html` |
 | `/software/wcopyfind-instructions/` | `https://wcopyfind.wfindapps.org/guide.html` |
 | `/software/faq/` | `https://wcopyfind.wfindapps.org/faq.html` |
 | `/software/interesting-things-wcopyfind-can-do/` | `https://wcopyfind.wfindapps.org/uses.html` |
 | `/software/copyfind/` | `https://wcopyfind.wfindapps.org/download.html#copyfind` |
-| `/2011/06/14/the-importance-of-writing/` | `https://wcopyfind.wfindapps.org/essays/the-importance-of-writing.html` |
-| `/2011/06/14/on-stating-the-goals-for-assigned-work/` | `https://wcopyfind.wfindapps.org/essays/on-stating-the-goals-for-assigned-work.html` |
-| `/2011/06/14/on-the-motivations-for-grade-inflation/` | `https://wcopyfind.wfindapps.org/essays/on-the-motivations-for-grade-inflation.html` |
-| `/2011/06/14/on-the-motivations-for-cheating/` | `https://wcopyfind.wfindapps.org/essays/on-the-motivations-for-cheating.html` |
+| `/software/to-do-list/`, release-announcement posts | `https://wcopyfind.wfindapps.org/changelog.html` |
+| the four essays (`/2011/06/14/...`) | `https://wcopyfind.wfindapps.org/essays/...` |
+| other posts, `/latest-posts/`, `/feed/` | `https://wfindapps.org/news.html` |
+| `/links/` | `https://wcopyfind.wfindapps.org/about-plagiarism.html` |
+| `/privacy-policy/` | `https://wfindapps.org/privacy.html` |
+| `/sample-page/`, `/copyright/`, `/terms-and-conditions/` | `https://wfindapps.org/about.html` |
 
-Keep the old download files (`/WCopyfind.4.1.5.exe.zip` and so on) where they are: the new WCopyfind download page links to them for older versions. In WordPress, the free *Redirection* plugin can set these up without editing server files.
+Real files are still served, so the old download files (`/WCopyfind.4.1.5.exe.zip` and so on) stay where they are: the new WCopyfind download page links to them for older versions. WordPress's login and admin pages keep working.

@@ -1,8 +1,14 @@
-# WRepeatfind 1.0.0
+# WRepeatfind 1.0.1
 
 WRepeatfind finds repeated phrases within a single document, or within a book made of several chapter files. It is meant for writers checking their own work for accidental repetition — for example, a paragraph that was moved while editing but whose original was never deleted.
 
 It uses the same fast comparison approach as WCopyfind and shares its document-reading code (`..\Common`), so it reads the same file types: `.docx`, `.doc`, `.txt`, `.pdf` (with `pdftotext.exe` beside `WRepeatfind.exe`), and `.htm`/`.html`. Text can also be pasted in directly.
+
+## What's new in 1.0.1
+- `.doc` files are read with Windows' IFilter reader as intended; in 1.0.0 it could not load, so they fell back to the rougher byte scanner
+- An About box (in the window's system menu) with a link to https://WRepeatfind.WFindApps.org
+- Licensed under the GNU General Public License, version 3 or later
+- A clearer message when a file can't be opened because it may be damaged
 
 ## Using it
 1. **Choose what to check.** Add documents (or drag them, or a folder of them, into the window), or click **Paste Text…**. For a book, list the chapters in order and leave **Check the documents together as one work** ticked, so that a passage repeated between chapter 2 and chapter 9 is found. Untick it to check each document on its own.

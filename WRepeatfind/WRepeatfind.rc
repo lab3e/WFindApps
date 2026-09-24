@@ -134,8 +134,8 @@ END
 // Version
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,0,0,0
+ FILEVERSION 1,0,1,0
+ PRODUCTVERSION 1,0,1,0
  FILEFLAGSMASK 0x3fL
  FILEFLAGS 0x0L
  FILEOS 0x40004L
@@ -149,11 +149,11 @@ BEGIN
             VALUE "CompanyName", "WFindApps.org"
             VALUE "FileDescription", "WRepeatfind - finds repeated phrases within documents"
             VALUE "LegalCopyright", "Copyright (C) 2026 Louis A. Bloomfield"
-            VALUE "FileVersion", "1.0.0.0"
+            VALUE "FileVersion", "1.0.1.0"
             VALUE "InternalName", "WRepeatfind.exe"
             VALUE "OriginalFilename", "WRepeatfind.exe"
             VALUE "ProductName", "WRepeatfind"
-            VALUE "ProductVersion", "1.0.0.0"
+            VALUE "ProductVersion", "1.0.1.0"
         END
     END
     BLOCK "VarFileInfo"

@@ -12,7 +12,7 @@
 #include "resource.h"
 #include "RepeatFinder.h"
 
-#define WREPEATFIND_NAME L"WRepeatfind 1.0.0"
+#define WREPEATFIND_NAME L"WRepeatfind 1.0.1"
 
 class CWRepeatfindApp : public CWinApp
 {

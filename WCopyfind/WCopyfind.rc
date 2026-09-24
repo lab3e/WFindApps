@@ -162,8 +162,8 @@ END
 // Version
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 6,0,1,0
- PRODUCTVERSION 6,0,1,0
+ FILEVERSION 6,0,2,0
+ PRODUCTVERSION 6,0,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -180,12 +180,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "WFindApps.org"
             VALUE "FileDescription", "WCopyfind - finds shared phrases in collections of documents"
-            VALUE "FileVersion", "6.0.1.0"
+            VALUE "FileVersion", "6.0.2.0"
             VALUE "InternalName", "WCopyfind.exe"
             VALUE "LegalCopyright", "Copyright (C) 2026 Louis A. Bloomfield"
             VALUE "OriginalFilename", "WCopyfind.exe"
             VALUE "ProductName", "WCopyfind"
-            VALUE "ProductVersion", "6.0.1.0"
+            VALUE "ProductVersion", "6.0.2.0"
         END
     END
     BLOCK "VarFileInfo"

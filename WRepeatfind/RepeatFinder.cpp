@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // RepeatFinder.cpp : finds repeated phrases within one document or one multi-document work
 
 #include "stdafx.h"

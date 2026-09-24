@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // MainDlg.h : the main WRepeatfind window
 
 #pragma once
@@ -24,6 +26,7 @@ protected:
 	virtual void OnCancel();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnSize(UINT nType, int cx, int cy);

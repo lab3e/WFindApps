@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // WCopyfind.cpp : defines the class behaviors for the application
 
 #include "stdafx.h"

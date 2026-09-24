@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // Function: HeapSort
 // Purpose: Sorts two tables together to put the first table in numerical order
 // Rewritten to use std::sort to eliminate 1-based indexing UB.

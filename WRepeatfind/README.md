@@ -32,3 +32,6 @@ For each later word, every earlier occurrence is tried and the longest match win
 - `MainDlg`, `PasteDlg`, `OptionsDlg` — the window and its two dialogs
 - `WRepeatfind.cpp` — application start-up, settings, command line, opening the report
 - `..\Common\DialogLayout.h` — keeps controls anchored as the window is resized (shared with WCopyfind)
+
+## License
+Copyright (C) 2026 Louis A. Bloomfield. WRepeatfind is free software under the GNU General Public License, version 3 or later; see [LICENSE](../LICENSE).

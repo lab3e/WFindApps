@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // PasteDlg.cpp : lets the writer paste text to check without saving a file first
 //
 // The pasted text is saved as a UTF-8 text file in %LOCALAPPDATA%\WRepeatfind\Pasted Text, named after the

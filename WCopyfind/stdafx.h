@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 
 // stdafx.h : include file for standard system include files,
 // or project specific include files that are used frequently,

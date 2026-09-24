@@ -88,5 +88,8 @@ Web site: https://WCopyfind.WFindApps.org
 - `clib\CompareDocuments` — the comparison engine; `clib\CompareReports.cpp` — the reports; `clib\ReportAssets.h` — their styles and scripts
 - `..\Common` — document reading, word filters and hashing, sorting, miniz, and the dialog layout helper shared with WRepeatfind
 
+## License
+Copyright (C) 2026 Louis A. Bloomfield. WCopyfind is free software under the GNU General Public License, version 3 or later; see [LICENSE](../LICENSE). Versions before 6.0.0 were published under version 2 or later.
+
 ## Building
 Open `WCopyfind.sln` (in the repository root) in Visual Studio 2022 or later with the **Desktop development with C++** workload and the **MFC** optional component installed. Build the Release x64 configuration. Each program builds into its own `x64\Release` folder.

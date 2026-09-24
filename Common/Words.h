@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 
 void WordRemovePunctuation(wchar_t *word);
 void wordxouterpunct(wchar_t *word);

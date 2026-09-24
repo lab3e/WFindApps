@@ -1,10 +1,15 @@
 //{{NO_DEPENDENCIES}}
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // Resource identifiers for WRepeatfind.rc
 
 #define IDR_MAINFRAME                   128
 #define IDD_WREPEATFIND_DIALOG          102
 #define IDD_PASTE                       130
 #define IDD_OPTIONS                     131
+#define IDD_ABOUTBOX                    100
+#define IDS_ABOUTBOX                    101
+#define IDM_ABOUTBOX                    0x0010
 
 // main dialog
 #define IDC_STATIC_STEP1                1000
@@ -59,6 +64,11 @@
 #define IDC_BUTTON_FOLDER               1210
 #define IDC_BUTTON_DEFAULTS             1211
 #define IDC_CHECK_AUTO_OPEN             1212
+
+// about box
+#define IDC_EDIT_ABOUT                  1300
+#define IDC_STATIC_VERSION              1301
+#define IDC_LINK_WEB                    1302
 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS

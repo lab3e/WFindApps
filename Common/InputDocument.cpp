@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 #include "stdafx.h"	// the including project's stdafx.h, found via its include path
 #include <stdio.h>
 #include <sys/types.h>

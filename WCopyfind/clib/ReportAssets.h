@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // ReportAssets.h : style sheets and scripts embedded in WCopyfind's HTML reports
 
 #pragma once

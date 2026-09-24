@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // WCopyfindDlg.cpp : the main WCopyfind window
 
 #include "stdafx.h"
@@ -42,12 +44,14 @@ BOOL CAboutDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT_ABOUT,
 		L"WCopyfind finds the phrases that documents share. It was written to detect plagiarism in student papers "
 		L"and has since been used for many other kinds of comparisons.\r\n\r\n"
-		L"This program is free software; you can redistribute it and/or modify it under the terms of the GNU General "
-		L"Public License as published by the Free Software Foundation; either version 2 of the License, or (at your "
+		L"This program is free software: you can redistribute it and/or modify it under the terms of the GNU General "
+		L"Public License as published by the Free Software Foundation, either version 3 of the License, or (at your "
 		L"option) any later version.\r\n\r\n"
 		L"This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the "
 		L"implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License "
-		L"for more details: https://www.gnu.org/licenses/\r\n\r\n"
+		L"for more details. You should have received a copy of the GNU General Public License along with this program. "
+		L"If not, see https://www.gnu.org/licenses/.\r\n\r\n"
+		L"Source code: https://github.com/lab3e/WFindApps\r\n\r\n"
 		L"If you significantly improve this program, please let me know through the web site.\r\n\r\n"
 		L"WCopyfind reads .docx files with miniz, by Rich Geldreich and contributors (MIT License).");
 	return TRUE;

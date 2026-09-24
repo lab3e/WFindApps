@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // OptionsDlg.cpp : the less commonly needed settings
 
 #include "stdafx.h"

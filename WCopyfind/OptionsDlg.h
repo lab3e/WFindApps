@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // OptionsDlg.h : the less commonly needed settings, and the vocabulary tool
 
 #pragma once

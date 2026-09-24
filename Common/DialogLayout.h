@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // DialogLayout.h : keeps dialog controls anchored as a resizable dialog changes size
 //
 // Each control is given the percentage (0-100) of the dialog's growth in width and height that it moves

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // RepeatFinder.h : the engine that finds repeated phrases within one document or one multi-document work
 //
 // The approach follows WCopyfind's CCompareDocuments: every word is hash-coded, the hash codes are sorted

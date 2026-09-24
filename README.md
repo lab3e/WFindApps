@@ -18,4 +18,13 @@ Each release is marked with a git tag: `WCopyfind-4.1.5` (the original source, b
 ## Building
 Open `WCopyfind.sln` in Visual Studio 2022 or later with the **Desktop development with C++** workload and the **MFC** optional component installed, and build the Release x64 configuration. Each program builds into its own `x64\Release` folder.
 
-Copyright (C) 2026 Louis A. Bloomfield. WCopyfind is free software under the GNU General Public License, version 2 or later.
+## License
+Copyright (C) 2026 Louis A. Bloomfield
+
+WCopyfind and WRepeatfind are free software: you can redistribute them and/or modify them under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. They are distributed in the hope that they will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the [LICENSE](LICENSE) file for the full text.
+
+In short: anyone may use, study, share, and change these programs. Anyone who distributes a changed version must make its source code available under the same license. Each source file carries the tag `SPDX-License-Identifier: GPL-3.0-or-later`.
+
+The bundled [miniz](Common/miniz) library, by Rich Geldreich, RAD Game Tools, Valve Software, and contributors, keeps its own MIT license, which is stated in its source files.
+
+Releases before 6.0.0 (tags `WCopyfind-4.1.5` and `WCopyfind-5.0.0`) were published under GPL version 2 or later.

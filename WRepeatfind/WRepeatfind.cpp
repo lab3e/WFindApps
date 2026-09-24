@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // WRepeatfind.cpp : defines the class behaviors for the application
 
 #include "stdafx.h"
@@ -29,7 +31,7 @@ BOOL CWRepeatfindApp::InitInstance()
 {
 	INITCOMMONCONTROLSEX InitCtrls;
 	InitCtrls.dwSize = sizeof(InitCtrls);
-	InitCtrls.dwICC = ICC_WIN95_CLASSES;
+	InitCtrls.dwICC = ICC_WIN95_CLASSES | ICC_LINK_CLASS;
 	InitCommonControlsEx(&InitCtrls);
 
 	CWinApp::InitInstance();

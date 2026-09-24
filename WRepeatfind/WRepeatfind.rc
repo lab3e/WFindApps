@@ -107,6 +107,30 @@ BEGIN
 END
 
 /////////////////////////////////////////////////////////////////////////////
+// About box
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 300, 176
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About WRepeatfind"
+FONT 9, "Segoe UI", 400, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,10,10,20,20
+    LTEXT           "WRepeatfind",IDC_STATIC_VERSION,40,10,200,11,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2026 Louis A. Bloomfield",IDC_STATIC,40,23,200,9,SS_NOPREFIX
+    CONTROL         "<a href=""https://WRepeatfind.WFindApps.org"">WRepeatfind.WFindApps.org</a>",IDC_LINK_WEB,"SysLink",WS_TABSTOP,40,35,200,9
+    EDITTEXT        IDC_EDIT_ABOUT,10,52,280,100,ES_MULTILINE | ES_READONLY | WS_VSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,240,156,50,14,WS_GROUP
+END
+
+/////////////////////////////////////////////////////////////////////////////
+// Strings
+
+STRINGTABLE
+BEGIN
+    IDS_ABOUTBOX            "&About WRepeatfind..."
+END
+
+/////////////////////////////////////////////////////////////////////////////
 // Version
 
 VS_VERSION_INFO VERSIONINFO
@@ -122,7 +146,9 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
+            VALUE "CompanyName", "WFindApps.org"
             VALUE "FileDescription", "WRepeatfind - finds repeated phrases within documents"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Louis A. Bloomfield"
             VALUE "FileVersion", "1.0.0.0"
             VALUE "InternalName", "WRepeatfind.exe"
             VALUE "OriginalFilename", "WRepeatfind.exe"

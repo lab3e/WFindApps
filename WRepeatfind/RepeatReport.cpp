@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // RepeatReport.cpp : writes the HTML report for CRepeatFinder
 //
 // The report is one self-contained page: a summary table of repeat groups, followed by the full text with

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // PasteDlg.h : lets the writer paste text (from a web editor, email, etc.) to check without saving a file first
 
 #pragma once

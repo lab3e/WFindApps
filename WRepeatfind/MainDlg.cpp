@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Louis A. Bloomfield
 // MainDlg.cpp : the main WRepeatfind window
 
 #include "stdafx.h"
@@ -13,6 +15,57 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+// ---------------------------------------------------------------------------------------------------------
+// About box
+
+class CAboutDlg : public CDialogEx
+{
+public:
+	CAboutDlg() : CDialogEx(IDD_ABOUTBOX) {}
+
+protected:
+	virtual BOOL OnInitDialog();
+	afx_msg void OnLinkClick(NMHDR* pNMHDR, LRESULT* pResult);
+	DECLARE_MESSAGE_MAP()
+};
+
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+	ON_NOTIFY(NM_CLICK, IDC_LINK_WEB, OnLinkClick)
+	ON_NOTIFY(NM_RETURN, IDC_LINK_WEB, OnLinkClick)
+END_MESSAGE_MAP()
+
+BOOL CAboutDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+	SetDlgItemText(IDC_STATIC_VERSION, WREPEATFIND_NAME);
+	SetDlgItemText(IDC_EDIT_ABOUT,
+		L"WRepeatfind finds the phrases that a document repeats, so writers can catch accidental repetition, "
+		L"such as a passage that was moved while editing but whose original was never deleted. It checks a single "
+		L"document or a book made of chapter files, and uses the comparison approach of its companion program, "
+		L"WCopyfind.\r\n\r\n"
+		L"This program is free software: you can redistribute it and/or modify it under the terms of the GNU General "
+		L"Public License as published by the Free Software Foundation, either version 3 of the License, or (at your "
+		L"option) any later version.\r\n\r\n"
+		L"This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the "
+		L"implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License "
+		L"for more details. You should have received a copy of the GNU General Public License along with this program. "
+		L"If not, see https://www.gnu.org/licenses/.\r\n\r\n"
+		L"Source code: https://github.com/lab3e/WFindApps\r\n\r\n"
+		L"If you have suggestions or find a problem, please let me know through the web site.\r\n\r\n"
+		L"WRepeatfind reads .docx files with miniz, by Rich Geldreich and contributors (MIT License).");
+	return TRUE;
+}
+
+void CAboutDlg::OnLinkClick(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	PNMLINK link = reinterpret_cast<PNMLINK>(pNMHDR);
+	ShellExecuteW(m_hWnd, L"open", link->item.szUrl, nullptr, nullptr, SW_SHOWNORMAL);
+	*pResult = 0;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// The window
 
 CMainDlg::CMainDlg(CWnd* pParent)
 	: CDialogEx(IDD_WREPEATFIND_DIALOG, pParent)
@@ -31,6 +84,7 @@ void CMainDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CMainDlg, CDialogEx)
+	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
@@ -54,6 +108,15 @@ END_MESSAGE_MAP()
 BOOL CMainDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	CMenu* pSysMenu = GetSystemMenu(FALSE);
+	if(pSysMenu != nullptr)
+	{
+		CString about;
+		about.LoadString(IDS_ABOUTBOX);
+		pSysMenu->AppendMenu(MF_SEPARATOR);
+		pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, about);
+	}
 	SetIcon(m_hIcon, TRUE);
 	SetIcon(m_hIcon, FALSE);
 	SetWindowText(WREPEATFIND_NAME);
@@ -104,6 +167,16 @@ BOOL CMainDlg::OnInitDialog()
 	UpdateButtons();
 	GetDlgItem(IDC_BUTTON_FIND)->SetFocus();
 	return FALSE;
+}
+
+void CMainDlg::OnSysCommand(UINT nID, LPARAM lParam)
+{
+	if((nID & 0xFFF0) == IDM_ABOUTBOX)
+	{
+		CAboutDlg about;
+		about.DoModal();
+	}
+	else CDialogEx::OnSysCommand(nID, lParam);
 }
 
 void CMainDlg::OnPaint()

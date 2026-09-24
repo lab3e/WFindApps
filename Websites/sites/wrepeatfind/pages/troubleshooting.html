@@ -1,0 +1,47 @@
+<!--
+title: WRepeatfind Troubleshooting
+description: Solutions for common WRepeatfind problems: SmartScreen warnings, no repeats found, too many repeats, files that can't be read, garbled characters, and reports that don't open.
+nav: FAQ
+help: yes
+schema: faq
+-->
+<h1>Troubleshooting</h1>
+
+<details open>
+<summary>Windows says "Windows protected your PC"</summary>
+<div><p>Click <em>More info</em>, then <em>Run anyway</em>. SmartScreen shows this for programs that aren't signed with a paid certificate.</p></div>
+</details>
+<details>
+<summary>WRepeatfind finds nothing, but I know something is repeated</summary>
+<div><ul>
+<li>The repeat may be shorter than <em>Report phrases of at least</em>. Try 4 or 5 words.</li>
+<li>The copies may differ by more words in a row than you allow. Raise <em>Allow up to ___ differing words in a row</em>, or lower the matching percentage in More Options.</li>
+<li>If the repeat is between two files, make sure <em>Check the documents together as one work</em> is ticked.</li>
+<li>A scanned PDF contains no text to read; check the original document instead.</li>
+</ul></div>
+</details>
+<details>
+<summary>It finds too many small repeats</summary>
+<div><p>Common phrases ("on the other hand", "at the same time") appear everywhere. Raise <em>Report phrases of at least</em> to 8 or 10 words to see only substantial repeats, and dismiss the rest.</p></div>
+</details>
+<details>
+<summary>A file can't be read</summary>
+<div><p>It may be open in another program that locks it, damaged, password-protected, or not really the type its extension says. Close it elsewhere, or save a fresh copy as <code>.docx</code> or <code>.txt</code>. You can also copy its text and use <em>Paste Text</em>.</p></div>
+</details>
+<details>
+<summary>Strange characters appear in the report</summary>
+<div><p>A plain-text file without a UTF-8 marker is read with Windows' standard character set. In Notepad, choose <em>Save as</em>, set <em>Encoding</em> to <em>UTF-8</em>, and check again. Or check the original Word document.</p></div>
+</details>
+<details>
+<summary>The report doesn't open</summary>
+<div><p>Click <em>Open Report</em>, or open the report file in <code>Documents\WRepeatfind Reports</code> yourself. The report opens automatically only when repeats are found, and only if that option is on in More Options.</p></div>
+</details>
+<details>
+<summary>My dismissed repeats came back</summary>
+<div><p>Dismissals are remembered by your web browser, for that document, by the passage's words. They come back if you edited the passage, opened the report in a different browser, cleared your browser's site data, or renamed the document.</p></div>
+</details>
+<details>
+<summary>The paragraph numbers don't match my word processor</summary>
+<div><p>WRepeatfind counts a paragraph each time the text starts a new line, and doesn't count empty lines. Headings, list items, and table cells each count as paragraphs. In plain-text files with a line break at the end of every line, each line counts.</p></div>
+</details>
+<p>Still stuck? Please <a href="{{hub}}/contact.html">report the problem</a> and include the version number from the title bar.</p>

@@ -1,0 +1,78 @@
+<!--
+title: Download WCopyfind
+description: Download WCopyfind {{wcopyfind_version}}, free plagiarism detection software for Windows 10 and 11. No installation needed, and your documents never leave your computer. Also: sample documents, PDF support, source code, and older versions.
+nav: Download
+-->
+<div class="wrap narrow">
+<h1>Download WCopyfind</h1>
+<p class="lead">WCopyfind is free for anyone to use, for any purpose.</p>
+
+<div class="card">
+<div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+<img src="/img/wcopyfind-icon.png" width="64" height="64" alt="">
+<div style="flex:1;min-width:14rem">
+<h2 style="margin:0">WCopyfind {{wcopyfind_version}}</h2>
+<p class="fine" style="margin:0">For 64-bit Windows 10 and 11 · {{wcopyfind_zip}} · {{wcopyfind_size}} · released {{wcopyfind_date}}</p>
+</div>
+<a class="btn" href="{{wcopyfind_download}}">Download</a>
+</div>
+</div>
+<p class="promise">{{privacy_short}} WCopyfind works offline and keeps no copies.</p>
+
+<h2>Installing and running it</h2>
+<ol class="steps">
+<li><strong>Download</strong> the .zip file above.</li>
+<li><strong>Unzip it:</strong> right-click the file in File Explorer and choose <em>Extract All</em>. Inside are <code>WCopyfind.exe</code>, a README, and the license.</li>
+<li><strong>Double-click <code>WCopyfind.exe</code>.</strong> There's nothing to install. Keep the program wherever you like; to remove it, just delete it.</li>
+</ol>
+<div class="warn">
+<p><strong>"Windows protected your PC"?</strong> Click <em>More info</em>, then <em>Run anyway</em>. Windows shows this for programs without a paid code-signing certificate, which is common for free software. WCopyfind is open source, so its code is <a href="{{github}}">public for anyone to inspect</a>.</p>
+</div>
+<p>Then follow the <a href="/guide.html">user guide</a>. Upgrading from WCopyfind 5 or earlier? Your settings carry over automatically the first time you run 6.0.</p>
+
+<h2>Sample documents</h2>
+<p><a href="/downloads/WCopyfind-Samples.zip">WCopyfind-Samples.zip</a> contains six short student essays on the Dust Bowl and an encyclopedia article, with some copying planted in them. The <a href="/guide.html#try">guide</a> walks you through finding it.</p>
+
+<h2 id="pdf">Reading PDF files</h2>
+<p>WCopyfind reads PDF files much better with <strong>pdftotext.exe</strong>, a free converter from the Xpdf project:</p>
+<ol>
+<li>Go to the <a href="{{xpdf}}">Xpdf download page</a> and download the <em>Xpdf command line tools</em> for Windows.</li>
+<li>Unzip them and find <code>pdftotext.exe</code> in the <code>bin64</code> folder.</li>
+<li>Copy <code>pdftotext.exe</code> into the same folder as <code>WCopyfind.exe</code>. WCopyfind uses it automatically from then on.</li>
+</ol>
+<p>A PDF made by scanning paper contains only pictures of text. To compare it, run it through OCR (text recognition) first, for example in Adobe Acrobat, and save the result as text.</p>
+
+<h2>System requirements</h2>
+<ul>
+<li>64-bit Windows 10 or Windows 11</li>
+<li>Memory: enough for your documents. A few hundred papers need very little; hundreds of thousands of documents need several gigabytes.</li>
+<li>A web browser to view the reports (any modern one)</li>
+</ul>
+<p>Mac and Linux: WCopyfind is a Windows program, but users have run it successfully with <a href="https://www.winehq.org/">Wine</a> and in Windows virtual machines.</p>
+
+<h2>Source code</h2>
+<p>WCopyfind is free software under the <a href="{{license}}">GNU General Public License, version 3 or later</a>. The complete source code is on <a href="{{github}}">GitHub</a>, where every release is tagged. It's written in C++ with Microsoft's MFC library and builds with Visual Studio 2022 or later.</p>
+
+<h2 id="older">Older versions</h2>
+<p>Most people should use the current version. Older versions remain available for special needs, such as very old Windows computers.</p>
+<ul>
+<li><a href="{{github}}/releases/tag/v5.0.0">WCopyfind 5.0.0</a> (February 2026), on GitHub</li>
+<li>WCopyfind 4.1.5 (April 2016): <a href="{{old_site}}/WCopyfind.4.1.5.exe.zip">32-bit</a> · <a href="{{old_site}}/WCopyfind64.4.1.5.exe.zip">64-bit</a> · <a href="{{old_site}}/WCopyfind.4.1.5.zip">source</a> · <a href="{{github}}/tree/WCopyfind-4.1.5">source on GitHub</a></li>
+<li>WCopyfind 4.1.4: <a href="{{old_site}}/WCopyfind.4.1.4.exe.zip">32-bit</a> · <a href="{{old_site}}/WCopyfind64.4.1.4.exe.zip">64-bit</a> · <a href="{{old_site}}/WCopyfind.4.1.4.zip">source</a></li>
+<li>WCopyfind 4.1.3: <a href="{{old_site}}/WCopyfind.4.1.3.exe.zip">32-bit</a> · <a href="{{old_site}}/WCopyfind64.4.1.3.exe.zip">64-bit</a></li>
+<li>WCopyfind 4.1.2: <a href="{{old_site}}/WCopyfind.4.1.2.exe.zip">32-bit</a> · <a href="{{old_site}}/WCopyfind64.4.1.2.exe.zip">64-bit</a></li>
+<li>WCopyfind 4.1.1: <a href="{{old_site}}/WCopyfind.4.1.1.exe.zip">32-bit</a> · <a href="{{old_site}}/WCopyfind64.4.1.1.exe.zip">64-bit</a></li>
+<li>WCopyfind 3.0.2: <a href="{{old_site}}/WCopyfind.3.0.2.exe.zip">program</a> · <a href="{{old_site}}/WCopyfind.3.0.2.zip">source</a></li>
+<li>WCopyfind 3.0.1: <a href="{{old_site}}/WCopyfind.3.0.1.exe.zip">program</a></li>
+<li>WCopyfind 3.0: <a href="{{old_site}}/WCopyfind.3.0.exe.zip">program</a> · <a href="{{old_site}}/WCopyfind.3.0.zip">source</a></li>
+<li>WCopyfind 2.7: <a href="{{old_site}}/WCopyfind.2.7.exe.zip">program</a> · <a href="{{old_site}}/WCopyfind.2.7.zip">source</a> · <a href="{{old_site}}/WCopyfind.2.7.Instructions.pdf">instructions (PDF)</a></li>
+</ul>
+
+<h3 id="copyfind">Copyfind, the command-line version</h3>
+<p>Copyfind 4.1.5 uses the same comparison engine as WCopyfind 4.1.5 but reads its instructions from a script, so it can run thousands of comparisons unattended. It hasn't been updated since 2016.</p>
+<ul>
+<li><a href="{{old_site}}/Copyfind.4.1.5.exe.zip">Copyfind 4.1.5 (32-bit)</a> · <a href="{{old_site}}/Copyfind64.4.1.5.exe.zip">64-bit</a> · <a href="{{old_site}}/Copyfind.4.1.5.zip">source</a></li>
+<li><a href="{{old_site}}/script.txt">A commented sample script</a> and the <a href="{{old_site}}/Sonnets.zip">Shakespeare sonnets</a> it compares</li>
+</ul>
+<p>To try it, unzip the sonnets into a folder, put Copyfind and <code>script.txt</code> there, edit the folder names in the script to match your computer, and run <code>Copyfind.4.1.5.exe &lt; script.txt</code> in a Command Prompt.</p>
+</div>

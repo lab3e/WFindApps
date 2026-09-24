@@ -1,0 +1,113 @@
+<!--
+title: WRepeatfind User Guide: How to Find Repetition in Your Writing
+description: A step-by-step guide to WRepeatfind: checking a document, a book of chapters, or pasted text for repeated phrases; choosing settings; and using the report to fix or dismiss each repeat.
+nav: User Guide
+help: yes
+schema: howto
+-->
+<h1>WRepeatfind user guide</h1>
+<p class="lead">How to check your writing for repeated passages, from a single article to a whole book.</p>
+
+<nav class="toc" aria-label="On this page">
+<p>On this page</p>
+<ol>
+<li><a href="#try">Try it in two minutes</a></li>
+<li><a href="#choose">Step 1: Choose what to check</a></li>
+<li><a href="#settings">Step 2: Decide what counts as a repeat</a></li>
+<li><a href="#review">Step 3: Find and review the repeats</a></li>
+<li><a href="#report">Using the report</a></li>
+<li><a href="#options">More Options</a></li>
+<li><a href="#commandline">Running WRepeatfind from the command line</a></li>
+<li><a href="#where">Where WRepeatfind keeps things</a></li>
+</ol>
+</nav>
+
+<div class="tip"><p><strong>Your manuscript stays private.</strong> WRepeatfind works entirely on your own computer and never uses the internet. Nothing you check is uploaded or stored anywhere else, including text you paste in.</p></div>
+
+<h2 id="try">Try it in two minutes</h2>
+<ol class="steps">
+<li><strong>Get the program and the samples.</strong> <a href="/download.html">Download WRepeatfind</a> and <a href="/downloads/WRepeatfind-Samples.zip">WRepeatfind-Samples.zip</a>, and unzip both.</li>
+<li><strong>Start WRepeatfind</strong> by double-clicking <code>WRepeatfind.exe</code>.</li>
+<li><strong>Drag the news article</strong> (<em>News Article - City Library Hours.txt</em>) into the window.</li>
+<li><strong>Click Find Repeats.</strong> WRepeatfind finds two repeated passages: a sentence about the library director that appears in paragraphs 4 and 7, and a sentence about the cost that appears in paragraphs 8 and 10. Both are the kind of leftovers that happen when a story is reorganized.</li>
+<li><strong>Double-click a repeat</strong> to see it highlighted in the report.</li>
+<li><strong>Now try a book.</strong> Remove the article, drag in the three files from the <em>Novel</em> folder, keep <em>Check the documents together as one work</em> ticked, and click Find Repeats. A paragraph from chapter 1 turns up again in chapter 2.</li>
+</ol>
+<figure>
+<img class="shot" src="/img/wrepeatfind-window.png" width="1064" height="899" loading="lazy" alt="WRepeatfind after checking the sample news article, listing two repeated passages">
+</figure>
+
+<h2 id="choose">Step 1: Choose what to check</h2>
+<ul>
+<li><strong>Add Documents</strong> to choose one or more files, or <strong>drag</strong> files, or a folder of them, into the window.</li>
+<li><strong>Paste Text</strong> to check text from anywhere, such as a web-based editor, an email, or a content management system. Give it a name, paste (<kbd>Ctrl</kbd>+<kbd>V</kbd>) or click <em>Paste from Clipboard</em>, and click <em>Add</em>. Pasting again under the same name replaces the earlier text, which is handy when you check a draft repeatedly.</li>
+<li><strong>Remove</strong>, <strong>Move Up</strong>, and <strong>Move Down</strong> arrange the list. Double-click a document to open it.</li>
+</ul>
+<p>WRepeatfind reads Word documents (<code>.docx</code> and <code>.doc</code>), plain text, web pages, and PDFs that contain text. The list is remembered between sessions.</p>
+
+<h3>Checking a book</h3>
+<p>For a book written as separate chapter files, add the chapters <strong>in order</strong> (dropped files and folders are sorted naturally, so "Chapter 2" comes before "Chapter 10") and keep <strong>Check the documents together as one work</strong> ticked. WRepeatfind then finds repeats between chapters as well as within them. Untick it to check each document on its own, for example a set of unrelated articles.</p>
+
+<h2 id="settings">Step 2: Decide what counts as a repeat</h2>
+<ul>
+<li><strong>Report phrases of at least ___ words</strong> (default 6). Shorter settings find more, including common phrases; longer settings find only substantial repeats. Six works well for most prose. Try 10 or more to find only duplicated sentences and paragraphs, or 4 to hunt for pet phrases.</li>
+<li><strong>Allow up to ___ differing words in a row</strong> (default 2). Lets a repeat survive small edits: a changed, added, or dropped word. Use 0 for exact repeats only.</li>
+<li><strong>Ignore letter case</strong> and <strong>Ignore punctuation</strong> (both on by default) keep a repeat from being missed because one copy starts a sentence or has a different comma. <strong>Ignore numbers</strong> also matches passages that differ only in figures or dates.</li>
+</ul>
+
+<h2 id="review">Step 3: Find and review the repeats</h2>
+<p>Click <strong>Find Repeats</strong>. Even a long book takes only a moment. The list shows each repeated passage:</p>
+<ul>
+<li><strong>#</strong>: the repeat's number, in the order it first appears</li>
+<li><strong>Words</strong>: the length of the longest copy</li>
+<li><strong>Copies</strong>: how many times it appears</li>
+<li><strong>Where</strong>: each copy's location, as a paragraph number (¶), with the document name when you check several documents</li>
+<li><strong>Begins with</strong>: the start of the passage</li>
+</ul>
+<p>Double-click a repeat (or select it and press <kbd>Enter</kbd>) to open the report at that passage. <strong>Open Report</strong> opens it at the top; WRepeatfind also opens it automatically when repeats are found.</p>
+<div class="note"><p>A "paragraph" is counted each time the text starts a new line. In a Word document that's each paragraph; in a plain-text file with a line break at the end of every line, it's each line.</p></div>
+
+<h2 id="report">Using the report</h2>
+<figure>
+<img class="shot" src="/img/wrepeatfind-report.png" width="1100" height="1000" loading="lazy" alt="A WRepeatfind report with repeated passages highlighted">
+</figure>
+<ul>
+<li>The <strong>summary table</strong> lists every repeat. Click a location (¶) to jump to that copy, or a repeat's number to jump to its first copy.</li>
+<li>In the text, <strong>each repeat is highlighted in its own color</strong>, with its number at the start of each copy. <strong>Click a highlight</strong> to jump to the next copy of the same passage.</li>
+<li><strong>Words in italics with a dotted underline</strong> differ between the copies.</li>
+<li><strong>Dismiss</strong> a repeat that's intentional, such as a refrain, a deliberate callback, or a repeated heading. Its highlight disappears and its row moves out of the way. Dismissals are remembered by your browser for this document, so they stay dismissed when you edit and check again, as long as the passage's words haven't changed. Tick <em>Show dismissed repeats</em> to see them again, and click <em>Restore</em> to undo.</li>
+<li><strong>Show only paragraphs with repeats</strong> hides the rest of the text.</li>
+</ul>
+<p>Fix repeats in your own document (WRepeatfind never changes it), then check again. See <a href="/tips.html">tips for writers and editors</a>.</p>
+
+<h2 id="options">More Options</h2>
+<ul>
+<li><strong>At least ___% of a phrase's words must match</strong> when it has differing words (default 80). Keeps unrelated text from being joined into a repeat.</li>
+<li><strong>Ignore punctuation only at the start and end of words</strong>: a gentler alternative to ignoring all punctuation.</li>
+<li><strong>Skip words that contain digits or symbols</strong>, and <strong>skip words longer than ___ characters</strong>: leave out web addresses, file names, and other non-words.</li>
+<li><strong>Basic characters only</strong>: discards words with accented or special characters. Rarely needed.</li>
+<li><strong>Language</strong>: tells WRepeatfind which characters are letters and punctuation.</li>
+<li><strong>Save reports in this folder</strong>: by default <code>Documents\WRepeatfind Reports</code>.</li>
+<li><strong>Open the report in my browser when repeats are found</strong>: on by default.</li>
+<li><strong>Restore All Defaults</strong> resets every setting.</li>
+</ul>
+
+<h2 id="commandline">Running WRepeatfind from the command line</h2>
+<p>WRepeatfind can run without its window, for batch jobs:</p>
+<pre><code>WRepeatfind.exe /report "report.html" [/summary "summary.txt"] [/separate] [/phrase N] [/tolerance N] documents...</code></pre>
+<ul>
+<li><code>/report</code>: where to write the report (required)</li>
+<li><code>/summary</code>: also write a tab-separated list of the repeats</li>
+<li><code>/separate</code>: check each document on its own instead of as one work</li>
+<li><code>/phrase</code>, <code>/tolerance</code>: the shortest phrase and the differing words allowed</li>
+</ul>
+<p>Other settings come from the window's saved settings.</p>
+
+<h2 id="where">Where WRepeatfind keeps things</h2>
+<ul>
+<li><strong>Reports</strong>: in the report folder, named after the document (for example, <code>Repeats in My Article.docx.html</code>). Checking the same document again replaces its report.</li>
+<li><strong>Pasted text</strong>: saved as text files in <code>%LOCALAPPDATA%\WRepeatfind\Pasted Text</code> on your computer, so the report can show it. Delete them whenever you like.</li>
+<li><strong>Settings and the document list</strong>: in your Windows user profile (the registry, under <code>HKEY_CURRENT_USER\Software\WRepeatfind</code>).</li>
+<li><strong>Dismissed repeats</strong>: in your web browser's storage for the report files.</li>
+</ul>
+<p>To uninstall WRepeatfind, delete <code>WRepeatfind.exe</code>, and optionally the report and pasted-text folders.</p>

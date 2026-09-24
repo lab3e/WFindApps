@@ -1,0 +1,62 @@
+<!--
+title: WCopyfind Troubleshooting
+description: Solutions for common WCopyfind problems: Windows SmartScreen warnings, no matches found, documents that can't be read, garbled characters, reports that don't open, slow comparisons, and error messages.
+nav: FAQ
+help: yes
+schema: faq
+-->
+<h1>Troubleshooting</h1>
+<p class="lead">If something isn't working, the answer is probably here.</p>
+
+<details open>
+<summary>Windows says "Windows protected your PC" and won't start WCopyfind</summary>
+<div><p>Click <em>More info</em>, then <em>Run anyway</em>. SmartScreen shows this warning for programs that aren't signed with a paid code-signing certificate. If your organization blocks unsigned programs entirely, ask your IT department to allow <code>WCopyfind.exe</code>.</p></div>
+</details>
+<details>
+<summary>WCopyfind finds no matches, but I know the documents share text</summary>
+<div><ul>
+<li><strong>Check the lists.</strong> Old documents are never compared with each other. If both documents are in the old list, move one to the new list.</li>
+<li><strong>Lower the thresholds.</strong> Short documents may share fewer words than <em>Report pairs that share at least</em> (100 by default). Try 20.</li>
+<li><strong>Look for edits.</strong> If the shared text was lightly changed, allow 2 imperfect words and set the matching percentage (More Options) to 80.</li>
+<li><strong>Check PDFs.</strong> A scanned PDF has no text to read. See the <a href="/faq.html">FAQ</a>.</li>
+<li><strong>Test with a copy.</strong> Compare a document with an identical copy of itself. If that doesn't match 100%, WCopyfind is having trouble reading that file; save it as <code>.docx</code> or <code>.txt</code> and try again.</li>
+</ul></div>
+</details>
+<details>
+<summary>A document "couldn't be read"</summary>
+<div><p>WCopyfind skips documents it can't read and lists them in the report with the reason. Common causes:</p>
+<ul>
+<li>The file is open in another program that locks it: close it there.</li>
+<li>The file is damaged, password-protected, or not really the type its extension says: open it in its own program and save a fresh copy.</li>
+<li>The file was moved or renamed after you added it: remove it from the list and add it again.</li>
+</ul></div>
+</details>
+<details>
+<summary>Strange characters appear in the report</summary>
+<div><p>This usually happens with plain-text files in languages other than English. A <code>.txt</code> file without a UTF-8 marker is read using Windows' standard character set. Open the file in Notepad, choose <em>Save as</em>, set <em>Encoding</em> to <em>UTF-8</em>, and compare again. Old <code>.doc</code> files that Windows can't read properly may also show stray characters; saving them as <code>.docx</code> fixes this.</p></div>
+</details>
+<details>
+<summary>The report doesn't open in my browser</summary>
+<div><p>Click <em>Open Report</em>, or open <code>matches.html</code> in the report folder yourself (by default, <code>Documents\WCopyfind Reports</code>). Check More Options: <em>Open the report in my browser when the comparison finishes</em> may be turned off.</p></div>
+</details>
+<details>
+<summary>"The report could not be written"</summary>
+<div><p>WCopyfind couldn't save files in the report folder. Choose a folder you can write to in More Options (your Documents folder always works), and close any report files that are open in other programs.</p></div>
+</details>
+<details>
+<summary>The comparison is very slow</summary>
+<div><p>Allowing imperfect words makes comparisons slower; try 0 for a first pass. Very large collections take longer because every document is compared with every other: 1,000 new documents make almost 500,000 pairs. Put reference material in the old list, since old documents aren't compared with each other. And if your computer is running low on memory, close other programs.</p></div>
+</details>
+<details>
+<summary>Every pair matches on the same passage</summary>
+<div><p>That's usually text all the documents legitimately share, such as the assignment prompt, a template, or a standard cover page. Remove it from the documents, or raise <em>Report pairs that share at least</em> above its length.</p></div>
+</details>
+<details>
+<summary>Numbers in a matching passage aren't highlighted</summary>
+<div><p>A number next to punctuation, or one that changed between copies, can break a match. Turn on <em>Ignore numbers</em>, and <em>Ignore punctuation only at the start and end of words</em> in More Options.</p></div>
+</details>
+<details>
+<summary>My settings or lists disappeared</summary>
+<div><p>WCopyfind saves them when you close it. If it was closed abnormally (for example, by shutting down Windows while it was running), the latest changes may be lost. Save important document lists with <em>Save List to File</em>.</p></div>
+</details>
+<p>Still stuck? Please <a href="{{hub}}/contact.html">report the problem</a> and include the version number from the title bar.</p>

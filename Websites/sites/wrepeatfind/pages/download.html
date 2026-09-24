@@ -1,0 +1,48 @@
+<!--
+title: Download WRepeatfind
+description: Download WRepeatfind {{wrepeatfind_version}}, free software that finds repeated phrases in your writing, for Windows 10 and 11. No installation, and your documents never leave your computer.
+nav: Download
+-->
+<div class="wrap narrow">
+<h1>Download WRepeatfind</h1>
+<p class="lead">WRepeatfind is free for anyone to use, for any purpose.</p>
+
+<div class="card">
+<div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+<img src="/img/wrepeatfind-icon.png" width="64" height="64" alt="">
+<div style="flex:1;min-width:14rem">
+<h2 style="margin:0">WRepeatfind {{wrepeatfind_version}}</h2>
+<p class="fine" style="margin:0">For 64-bit Windows 10 and 11 · {{wrepeatfind_zip}} · {{wrepeatfind_size}} · released {{wrepeatfind_date}}</p>
+</div>
+<a class="btn" href="{{wrepeatfind_download}}">Download</a>
+</div>
+</div>
+<p class="promise">{{privacy_short}} WRepeatfind never uses the internet.</p>
+
+<h2>Installing and running it</h2>
+<ol class="steps">
+<li><strong>Download</strong> the .zip file above.</li>
+<li><strong>Unzip it:</strong> right-click the file in File Explorer and choose <em>Extract All</em>. Inside are <code>WRepeatfind.exe</code>, a README, and the license.</li>
+<li><strong>Double-click <code>WRepeatfind.exe</code>.</strong> There's nothing to install. Keep it wherever you like; to remove it, just delete it.</li>
+</ol>
+<div class="warn">
+<p><strong>"Windows protected your PC"?</strong> Click <em>More info</em>, then <em>Run anyway</em>. Windows shows this for programs without a paid code-signing certificate, which is common for free software. WRepeatfind is open source, so its code is <a href="{{github}}">public for anyone to inspect</a>.</p>
+</div>
+<p>Then follow the <a href="/guide.html">user guide</a>.</p>
+
+<h2>Sample documents</h2>
+<p><a href="/downloads/WRepeatfind-Samples.zip">WRepeatfind-Samples.zip</a> contains a news article with two passages accidentally left in twice, and a three-chapter story with a passage repeated between chapters. The <a href="/guide.html#try">guide</a> shows what to expect.</p>
+
+<h2 id="pdf">Reading PDF files</h2>
+<p>WRepeatfind reads PDF files best with <strong>pdftotext.exe</strong>, a free converter: download the <em>Xpdf command line tools</em> for Windows from the <a href="{{xpdf}}">Xpdf download page</a>, find <code>pdftotext.exe</code> in the <code>bin64</code> folder, and copy it into the same folder as <code>WRepeatfind.exe</code>. It's usually simpler to check the original Word document instead.</p>
+
+<h2>System requirements</h2>
+<ul>
+<li>64-bit Windows 10 or Windows 11</li>
+<li>A web browser to view the report</li>
+</ul>
+<p>Even a book-length manuscript takes WRepeatfind less than a second. Mac and Linux users can try <a href="https://www.winehq.org/">Wine</a> or a Windows virtual machine.</p>
+
+<h2>Source code</h2>
+<p>WRepeatfind is free software under the <a href="{{license}}">GNU General Public License, version 3 or later</a>. The source code is on <a href="{{github}}">GitHub</a>, alongside WCopyfind's; every release is tagged.</p>
+</div>

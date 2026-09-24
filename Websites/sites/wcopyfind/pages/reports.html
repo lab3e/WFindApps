@@ -1,0 +1,70 @@
+<!--
+title: Reading WCopyfind Reports and Results
+description: How to read WCopyfind's results: what matching words and percentages mean, how to use the side-by-side pages and the list of matching pairs, and what the matches.txt and log files contain.
+nav: Reports
+help: yes
+schema: howto
+-->
+<h1>Reading the results</h1>
+<p class="lead">WCopyfind's reports are web pages saved on your computer. Here's how to read them.</p>
+
+<h2 id="numbers">What the numbers mean</h2>
+<p>For each matching pair, WCopyfind counts the words that fall inside matching phrases (phrases at least as long as your <em>Match phrases of at least</em> setting):</p>
+<ul>
+<li><strong>Matching words</strong>: words in phrases the two documents share <em>exactly</em>. This is the number compared with your <em>Report pairs that share at least</em> setting.</li>
+<li><strong>% of A</strong>, <strong>% of B</strong>: the matching words as a percentage of each document's length. If document A has 1,000 words, document B has 2,000, and they share 100, that's 10% of A and 5% of B. A high percentage on one side only often means that document was built largely from the other.</li>
+<li><strong>Including imperfect (A / B)</strong>: shown when you allow imperfect words. The number of words in matching phrases in each document, counting the changed words inside them. The two sides can differ slightly, because a word inserted in one copy has no partner in the other.</li>
+</ul>
+<p>"&lt;1%" means some text matched, but less than one percent of the document.</p>
+
+<h2 id="index">The list of matching pairs</h2>
+<figure>
+<img class="shot" src="/img/wcopyfind-report-index.png" width="1400" height="860" loading="lazy" alt="The WCopyfind report index: a summary of the comparison and a table of matching pairs with their shared words and percentages">
+<figcaption><code>matches.html</code>, the report's front page.</figcaption>
+</figure>
+<p>The report opens with a summary: how many pairs matched, how many documents and pairs were compared, the settings used, and any documents that couldn't be read. Below is a table of the matching pairs.</p>
+<ul>
+<li><strong>Type in the filter box</strong> to show only pairs involving a particular name.</li>
+<li><strong>Click a column heading</strong> to sort by it; click again to reverse the order.</li>
+<li><strong>Click a pair</strong> (its number or either document name) to open it side by side.</li>
+</ul>
+<p>The small bars show each document's shared percentage at a glance.</p>
+
+<h2 id="pair">The side-by-side pages</h2>
+<figure>
+<img class="shot" src="/img/wcopyfind-report-pair.png" width="1400" height="900" loading="lazy" alt="A WCopyfind side-by-side page with matching passages highlighted in both documents">
+</figure>
+<p>Each matching pair has its own page with the two documents next to each other. Each scrolls on its own.</p>
+<ul>
+<li><strong>Highlighted passages</strong> are the matching phrases. Each phrase has the same color in both documents, and neighboring phrases alternate colors so you can tell them apart.</li>
+<li><strong>Words in italics with a dotted underline</strong> are imperfect matches: words that differ between the copies but lie inside a matching passage.</li>
+<li><strong>Click a highlighted passage</strong> and the other document scrolls to its twin, which briefly flashes.</li>
+<li><strong>Next match / Previous match</strong>, or the <kbd>N</kbd> and <kbd>P</kbd> keys, step through the passages in order.</li>
+<li><strong>Show only paragraphs with matches</strong> hides everything else, for a quick read of the shared material.</li>
+<li><strong>Previous pair / Next pair</strong> move through the report without going back to the list.</li>
+</ul>
+<p>The pages work in any modern browser, print cleanly, and follow your computer's light or dark setting. With the <a href="/settings.html#brief">Brief report</a> setting, they contain only the matching passages.</p>
+
+<h2 id="interpret">Interpreting matches</h2>
+<p>A match means two documents share wording. It doesn't, by itself, mean anyone did something wrong:</p>
+<ul>
+<li><strong>Quotations and citations</strong> are supposed to match their sources. Check whether a matching passage is quoted and credited.</li>
+<li><strong>Common phrases and boilerplate</strong>, such as an assignment prompt, a required heading, or a standard definition, match across many documents. They show up as short matches spread over many pairs.</li>
+<li><strong>Shared sources</strong> create matches between students who quoted the same source, even if neither copied the other. Adding the source to the old documents makes this clear: both students will match it.</li>
+<li><strong>Copying between students</strong> tends to show up as long runs of matching text, in the same order, including distinctive wording and mistakes.</li>
+</ul>
+<p>Use the report as evidence to look at closely, not as a verdict. For more, see <a href="/about-plagiarism.html">about plagiarism</a>.</p>
+
+<h2 id="files">The files in the report folder</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>File</th><th>Contains</th></tr></thead>
+<tbody>
+<tr><td><code>matches.html</code></td><td>The list of matching pairs, described above. Open this one.</td></tr>
+<tr><td><code>pairs\pair-00001.html</code>, …</td><td>One side-by-side page per matching pair.</td></tr>
+<tr><td><code>matches.txt</code></td><td>The same list as plain text for spreadsheets and scripts: one line per pair with five tab-separated columns: exactly matching words, words in matching phrases in A, words in matching phrases in B, and the full names of documents A and B. The format is the same as in earlier versions (now in UTF-8, so all file names survive).</td></tr>
+<tr><td><code>log.txt</code></td><td>A record of the run: each document loaded, progress, each match, and the total time.</td></tr>
+</tbody>
+</table>
+</div>
+<p>To keep a report, copy the whole report folder somewhere else before your next comparison, which replaces it. You can also save the list of pairs shown in WCopyfind's window: right-click it and choose <em>Save List to File</em>.</p>

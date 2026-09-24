@@ -1,0 +1,101 @@
+<!--
+title: WCopyfind FAQ: Privacy, Languages, File Types, and More
+description: Answers to common questions about WCopyfind: whether documents are uploaded (they never are), searching the internet, languages, PDFs, Mac and Linux, how many documents it can handle, and what its numbers mean.
+nav: FAQ
+help: yes
+schema: faq
+-->
+<h1>Frequently asked questions</h1>
+<p class="lead">Questions people have asked about WCopyfind over the years, with answers for the current version.</p>
+
+<h2>Privacy and cost</h2>
+<details open id="private">
+<summary>Are my documents uploaded or shared with anyone?</summary>
+<div><p>No, never. WCopyfind reads and compares your documents entirely on your own computer. Nothing is uploaded, nothing is stored in the cloud, and no other computer ever sees your text. It doesn't need an account or an internet connection. That makes it safe for student papers, unpublished work, and confidential documents. Unlike many online plagiarism checkers, it keeps no copies of anything: it never receives anything to keep.</p>
+<p>The only time WCopyfind uses the internet is when you give it an internet shortcut to a web page, and then it only downloads that page. See the <a href="{{hub}}/privacy.html">privacy statement</a>.</p></div>
+</details>
+<details>
+<summary>Is WCopyfind really free?</summary>
+<div><p>Yes, for anyone and any purpose: schools, businesses, research, or personal use. There's no trial period, no paid version, and no advertising. It's open-source software under the GNU General Public License, version 3 or later.</p></div>
+</details>
+<details>
+<summary>Can I use WCopyfind at my school or company, or build on it?</summary>
+<div><p>Yes. You can use it however you like, and install it on as many computers as you want. You may also modify it and share your changes; if you distribute a modified version, the GNU General Public License requires you to share its source code under the same license. The <a href="{{github}}">source code is on GitHub</a>.</p></div>
+</details>
+
+<h2>What it can and can't do</h2>
+<details id="web">
+<summary>Does WCopyfind search the internet for copied text?</summary>
+<div><p>No. WCopyfind compares only the documents you give it. Searching the whole web requires a large commercial service. WCopyfind can, however, compare web pages you point it to: save them as <code>.html</code> files, or create internet shortcuts to them (drag the address from your browser to a folder) and add those shortcuts to the old documents list. If a phrase in a paper sounds unoriginal, searching for it in a search engine often finds the source, which you can then add.</p></div>
+</details>
+<details>
+<summary>How many documents can it compare?</summary>
+<div><p>Far more than two. A class set of a few hundred papers takes seconds, and researchers use it on much larger collections. The limits are your computer's memory and your patience, since the number of pairs grows with the square of the number of documents: 100 documents make 4,950 pairs, and 1,000 make 499,500.</p></div>
+</details>
+<details>
+<summary>Can it compare just two documents?</summary>
+<div><p>Yes. Put both in the new documents list (or one in each list), lower <em>Report pairs that share at least</em> if they're short, and compare.</p></div>
+</details>
+<details>
+<summary>Does it detect paraphrasing?</summary>
+<div><p>Partly. With imperfections allowed (for example, up to 2 imperfect words in a row with 80% matching), WCopyfind finds copying that was lightly edited: a few words changed, added, or removed. It doesn't understand meaning, so text that was thoroughly rewritten in different words won't match.</p></div>
+</details>
+<details>
+<summary>What is the difference between new and old documents?</summary>
+<div><p>New documents are compared with each other and with the old documents. Old documents are compared only with the new ones, never with each other. Put the papers you're checking in the new list, and sources and past papers in the old list. See the <a href="/guide.html#documents">guide</a>.</p></div>
+</details>
+<details>
+<summary>Does a match prove plagiarism?</summary>
+<div><p>No. It shows that two documents share wording, which you then need to judge. Quotations, citations, common phrases, assignment prompts, and shared sources all produce matches. WCopyfind shows you exactly where to look. See <a href="/reports.html#interpret">interpreting matches</a>.</p></div>
+</details>
+
+<h2>Files and languages</h2>
+<details>
+<summary>Which file types can it read?</summary>
+<div><p>Word documents (<code>.docx</code> and older <code>.doc</code>), plain text (<code>.txt</code>), web pages (<code>.htm</code> and <code>.html</code>), PDFs that contain text, and internet shortcuts (<code>.url</code>) to web pages. It will try to find text in other files too, with no guarantees. If a file won't read well, save it as <code>.txt</code> or <code>.docx</code> from the program that made it.</p></div>
+</details>
+<details>
+<summary>Why doesn't it find the text in my PDF?</summary>
+<div><p>Many PDFs, especially scanned ones, contain pictures of pages rather than text. You can see the words, but there are none for a program to read. Run the PDF through OCR (text recognition) software first. For PDFs that do contain text, WCopyfind reads them much better with the free <a href="/download.html#pdf">pdftotext.exe</a> placed beside it.</p></div>
+</details>
+<details>
+<summary>Does it work with languages other than English?</summary>
+<div><p>Yes. WCopyfind compares any language that separates words with spaces or punctuation, including Spanish, French, German, Greek, Russian, and many others. Choose the closest language in More Options so WCopyfind knows which characters are letters and punctuation. Languages written without spaces between words, such as Chinese and Japanese, don't work well. For plain-text files in other languages, save them as UTF-8 so WCopyfind reads every character correctly.</p></div>
+</details>
+<details>
+<summary>What about file names with accents or in other scripts?</summary>
+<div><p>They work. WCopyfind 6 handles file and folder names in any language, including in its saved lists and reports.</p></div>
+</details>
+
+<h2>Computers</h2>
+<details>
+<summary>Does it run on a Mac or on Linux?</summary>
+<div><p>WCopyfind is a Windows program. Mac and Linux users have run it successfully with <a href="https://www.winehq.org/">Wine</a>, and it runs in any Windows virtual machine.</p></div>
+</details>
+<details>
+<summary>Does it need to be installed?</summary>
+<div><p>No. It's a single program file: unzip it and double-click. To remove it, delete the file.</p></div>
+</details>
+<details>
+<summary>Why does Windows warn me when I run it?</summary>
+<div><p>Windows SmartScreen warns about programs that aren't signed with a paid certificate. Click <em>More info</em>, then <em>Run anyway</em>. WCopyfind is open source, so anyone can check what it does.</p></div>
+</details>
+<details>
+<summary>Is there a version I can run from a script?</summary>
+<div><p>An older command-line version, <a href="/download.html#copyfind">Copyfind 4.1.5</a>, reads its instructions from a script file and can run thousands of comparisons unattended. It uses the same engine as WCopyfind 4.1.5.</p></div>
+</details>
+
+<h2>Results</h2>
+<details>
+<summary>What do the numbers and percentages mean?</summary>
+<div><p><em>Matching words</em> is the number of words in phrases the two documents share exactly. <em>% of A</em> and <em>% of B</em> are those words as a percentage of each document's length. See <a href="/reports.html#numbers">what the numbers mean</a>.</p></div>
+</details>
+<details>
+<summary>Can I save or print a side-by-side comparison?</summary>
+<div><p>Yes. The pages print cleanly from your browser, and you can save them with your browser's <em>Save as</em>. To keep a whole report, copy the report folder. You can also select all the text in one document and paste it into a word processor or spreadsheet.</p></div>
+</details>
+<details>
+<summary>How do I cite WCopyfind in a paper?</summary>
+<div><p>For example: Bloomfield, L. A. (2026). <em>WCopyfind</em> (Version {{wcopyfind_version}}) [Computer software]. https://wcopyfind.wfindapps.org</p></div>
+</details>
+<p>Didn't find your answer? See <a href="/troubleshooting.html">troubleshooting</a>, or <a href="{{hub}}/contact.html">ask a question</a>.</p>

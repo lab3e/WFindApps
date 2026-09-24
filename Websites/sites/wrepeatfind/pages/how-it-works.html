@@ -1,0 +1,30 @@
+<!--
+title: How WRepeatfind Works
+description: How WRepeatfind finds repeated passages within a document: turning words into numbers, sorting them, pairing each repeated word with its earlier copies, growing matches across small edits, and grouping copies into repeats.
+nav: How It Works
+help: yes
+schema: article
+-->
+<h1>How WRepeatfind works</h1>
+<p class="lead">WRepeatfind uses the same fast matching engine as <a href="{{wcf}}/how-it-works.html">WCopyfind</a>, turned inward: instead of comparing two documents, it compares a document with itself.</p>
+
+<h2>1. Words become numbers</h2>
+<p>WRepeatfind reads your text word by word, applies your settings (ignoring case, punctuation, or numbers), and turns each word into a number, a <em>hash code</em>. The same word always gets the same number, so from here on comparing words means comparing numbers, which is very fast. For a book of chapters, the chapters are read in order into one long list.</p>
+
+<h2>2. Identical words are gathered</h2>
+<p>WRepeatfind sorts the list of numbers, so every occurrence of each word ends up side by side, still labeled with its position in the text. A word that appears five times is now a small group of five positions. Each pair of positions in a group, an earlier occurrence and a later one, is a place where a repeated passage might begin.</p>
+
+<h2>3. Matches grow into passages</h2>
+<p>From each such pair, WRepeatfind looks at the words before and after both occurrences and extends the match as long as they agree, bridging small differences if you allow them (a changed, added, or dropped word), the same way WCopyfind does. Two rules are special to looking within one text:</p>
+<ul>
+<li><strong>The copies can't overlap.</strong> The earlier copy must end before the later one begins, so a phrase isn't "repeated" just by running into itself.</li>
+<li><strong>A passage can be the source of many copies.</strong> A word can belong to the <em>later</em> copy of only one passage, but any passage can be the <em>earlier</em> copy of several. That's how a passage that appears three times is found three times, not twice.</li>
+</ul>
+<p>For each later word, WRepeatfind tries every earlier occurrence and keeps the longest match, so a passage is paired with its real twin rather than a short coincidence. A match is kept if it has at least as many exactly matching words as your <em>Report phrases of at least</em> setting. Copies never cross from one chapter file into the next.</p>
+
+<h2>4. Copies are gathered into repeats</h2>
+<p>Pairs of copies that share any words are joined into one group, so a passage appearing in three places becomes one repeat with three copies. The repeats are numbered in the order they first appear, and the report highlights each one in its own color.</p>
+
+<h2>Why it's fast</h2>
+<p>Sorting brings identical words together in a single step, so WRepeatfind never has to compare every part of the text with every other part directly. A 250,000-word text takes under half a second, including writing the report.</p>
+<p>The engine is in <code>WRepeatfind/RepeatFinder.cpp</code> in the <a href="{{github}}">source code on GitHub</a>.</p>

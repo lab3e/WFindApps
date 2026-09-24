@@ -1,0 +1,71 @@
+<!--
+title: WRepeatfind FAQ
+description: Answers to common questions about WRepeatfind: privacy (your writing never leaves your computer), what it finds, file types, languages, books, pasted text, and how it differs from grammar checkers and WCopyfind.
+nav: FAQ
+help: yes
+schema: faq
+-->
+<h1>Frequently asked questions</h1>
+
+<h2>Privacy and cost</h2>
+<details open>
+<summary>Is my writing uploaded or shared with anyone?</summary>
+<div><p>No, never. WRepeatfind works entirely on your own computer and doesn't use the internet at all. Your manuscript, article, or thesis is never uploaded, stored in the cloud, or read by any other computer, and there's no account to create. Unpublished work stays exactly as private as it is on your own disk. See the <a href="{{hub}}/privacy.html">privacy statement</a>.</p></div>
+</details>
+<details>
+<summary>What happens to text I paste in?</summary>
+<div><p>It's saved as a text file on your own computer (in <code>%LOCALAPPDATA%\WRepeatfind\Pasted Text</code>), so WRepeatfind can read it and show it in the report. It goes nowhere else. You can delete those files whenever you like.</p></div>
+</details>
+<details>
+<summary>Is WRepeatfind free?</summary>
+<div><p>Yes, for anyone and any purpose, with no trial period, paid version, or advertising. It's open-source software under the GNU General Public License, version 3 or later.</p></div>
+</details>
+
+<h2>What it does</h2>
+<details>
+<summary>What counts as a repeat?</summary>
+<div><p>A passage of at least six words (you can change this) that appears more than once, allowing up to two differing words in a row by default. A passage that appears three times is reported once, as a repeat with three copies. Single repeated words, like "however" used too often, aren't reported; WRepeatfind looks for phrases, sentences, and paragraphs.</p></div>
+</details>
+<details>
+<summary>How is this different from a grammar or style checker?</summary>
+<div><p>Grammar and style checkers look at one sentence at a time, so a sentence that appears twice looks fine to them both times. WRepeatfind compares every part of your text with every other part, however far apart, and finds the passages that appear more than once.</p></div>
+</details>
+<details>
+<summary>How is it different from WCopyfind?</summary>
+<div><p><a href="{{wcf}}/">WCopyfind</a> compares different documents with each other, for example to find copying between student papers. WRepeatfind looks inside one document, or one book made of chapters, for repetition. They share the same matching engine.</p></div>
+</details>
+<details>
+<summary>Can it check a whole book?</summary>
+<div><p>Yes, either as one long file or as separate chapter files. Add the chapters in order and keep <em>Check the documents together as one work</em> ticked, and it finds repeats between chapters too. A book-length manuscript takes less than a second.</p></div>
+</details>
+<details>
+<summary>Does it change my document?</summary>
+<div><p>No. WRepeatfind only reads your documents. You make the fixes in your own word processor, then check again.</p></div>
+</details>
+<details>
+<summary>Some repeats are intentional. Can I hide them?</summary>
+<div><p>Yes. Click <em>Dismiss</em> next to a repeat in the report. It's remembered for that document, even after you edit and check again, as long as the passage's words don't change.</p></div>
+</details>
+
+<h2>Files and computers</h2>
+<details>
+<summary>Which file types can it read?</summary>
+<div><p>Word documents (<code>.docx</code> and <code>.doc</code>), plain text, web pages (<code>.htm</code>, <code>.html</code>), and PDFs that contain text. Or paste text in directly. For other formats, save as <code>.docx</code> or <code>.txt</code> first, or copy and paste.</p></div>
+</details>
+<details>
+<summary>Does it work in languages other than English?</summary>
+<div><p>Yes, in any language that separates words with spaces or punctuation. Choose the closest language in More Options. Languages written without spaces between words, such as Chinese and Japanese, don't work well.</p></div>
+</details>
+<details>
+<summary>Does it run on a Mac?</summary>
+<div><p>WRepeatfind is a Windows program. On a Mac you can try <a href="https://www.winehq.org/">Wine</a> or a Windows virtual machine.</p></div>
+</details>
+<details>
+<summary>Why does Windows warn me when I run it?</summary>
+<div><p>Windows SmartScreen warns about programs that aren't signed with a paid certificate. Click <em>More info</em>, then <em>Run anyway</em>. WRepeatfind is open source, so anyone can check what it does.</p></div>
+</details>
+<details>
+<summary>Can I run it from a script?</summary>
+<div><p>Yes. See <a href="/guide.html#commandline">running WRepeatfind from the command line</a>.</p></div>
+</details>
+<p>Didn't find your answer? See <a href="/troubleshooting.html">troubleshooting</a>, or <a href="{{hub}}/contact.html">ask a question</a>.</p>

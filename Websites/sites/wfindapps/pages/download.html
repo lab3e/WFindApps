@@ -1,0 +1,55 @@
+<!--
+title: Download WCopyfind and WRepeatfind
+description: Download the latest versions of WCopyfind and WRepeatfind, free for Windows 10 and 11, plus sample documents to try them with, the source code, and older versions.
+nav: Download
+-->
+<div class="wrap narrow">
+<h1>Downloads</h1>
+<p class="lead">Both programs are free for anyone to use, for any purpose. They run on 64-bit Windows 10 and Windows 11, entirely on your own computer.</p>
+<p class="promise">{{privacy_short}} Nothing is uploaded or stored anywhere else.</p>
+
+<div class="grid two">
+<div class="card app-card">
+<header><img src="/img/wcopyfind-icon.png" width="52" height="52" alt=""><h2>WCopyfind {{wcopyfind_version}}</h2></header>
+<p>Compares documents with each other to find the phrases they share.</p>
+<p class="fine">{{wcopyfind_zip}} · {{wcopyfind_size}} · released {{wcopyfind_date}}</p>
+<div class="btn-row"><a class="btn" href="{{wcopyfind_download}}">Download</a><a class="btn btn-secondary" href="{{wcf}}/download.html">Details</a></div>
+</div>
+<div class="card app-card">
+<header><img src="/img/wrepeatfind-icon.png" width="52" height="52" alt=""><h2>WRepeatfind {{wrepeatfind_version}}</h2></header>
+<p>Finds the phrases one document, or a book, repeats.</p>
+<p class="fine">{{wrepeatfind_zip}} · {{wrepeatfind_size}} · released {{wrepeatfind_date}}</p>
+<div class="btn-row"><a class="btn" href="{{wrepeatfind_download}}">Download</a><a class="btn btn-secondary" href="{{wrf}}/download.html">Details</a></div>
+</div>
+</div>
+
+<h2>Installing</h2>
+<ol class="steps">
+<li><strong>Download the .zip file</strong> for the program you want.</li>
+<li><strong>Unzip it.</strong> In File Explorer, right-click the file and choose <em>Extract All</em>. You'll get the program, a README, and the license.</li>
+<li><strong>Double-click the program</strong> (<code>WCopyfind.exe</code> or <code>WRepeatfind.exe</code>). There's nothing to install. You can keep it anywhere, such as your Desktop or Documents folder.</li>
+</ol>
+<div class="warn">
+<p><strong>If Windows says "Windows protected your PC"</strong>, click <em>More info</em> and then <em>Run anyway</em>. Windows shows this warning for programs that haven't paid for a code-signing certificate, which free programs often haven't. The programs are open source: anyone can read exactly what they do on <a href="{{github}}">GitHub</a>.</p>
+</div>
+
+<h2>Sample documents</h2>
+<p>New to the programs? These small sets of documents show what each one finds in about a minute.</p>
+<ul>
+<li><a href="{{wcf}}/downloads/WCopyfind-Samples.zip">WCopyfind samples</a>: six short student essays and an encyclopedia article, with some copying planted in them</li>
+<li><a href="{{wrf}}/downloads/WRepeatfind-Samples.zip">WRepeatfind samples</a>: a news article with accidental repetition, and a three-chapter story</li>
+</ul>
+
+<h2>Reading PDF files</h2>
+<p>Both programs read PDF files best with the help of <strong>pdftotext.exe</strong>, a free converter from the <a href="{{xpdf}}">Xpdf command-line tools</a>. Download the Windows version, find <code>pdftotext.exe</code> inside (in the <code>bin64</code> folder), and put it in the same folder as WCopyfind or WRepeatfind. They'll use it automatically. PDFs that are only pictures of pages (scans) contain no text to read; run them through OCR software first.</p>
+
+<h2>Source code and older versions</h2>
+<ul>
+<li><a href="{{github}}">Source code on GitHub</a>, under the GNU General Public License, version 3 or later. Every release is tagged, back to WCopyfind 4.1.5.</li>
+<li><a href="{{github}}/releases">All releases on GitHub</a>, including WCopyfind 5.0.0</li>
+<li><a href="{{wcf}}/download.html#older">Older WCopyfind versions</a> (2.7 through 4.1.5) and Copyfind, the command-line version</li>
+</ul>
+
+<h2>Mac and Linux</h2>
+<p>The programs are written for Windows. Mac and Linux users have run WCopyfind successfully with <a href="https://www.winehq.org/">Wine</a>, or in a Windows virtual machine.</p>
+</div>

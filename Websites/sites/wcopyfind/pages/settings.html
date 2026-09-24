@@ -1,0 +1,87 @@
+<!--
+title: WCopyfind Settings Explained, with Recommended Values
+description: What each WCopyfind setting does, from the shortest phrase to match and imperfect words to ignoring punctuation, skipping non-words, language, and brief reports, with recommended values for exact and edited copying.
+nav: Settings
+help: yes
+schema: howto
+-->
+<h1>WCopyfind settings explained</h1>
+<p class="lead">What each setting does, and how to choose values for your documents.</p>
+
+<h2>Quick recommendations</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Setting</th><th>To find exact copying</th><th>To find edited copying too</th></tr></thead>
+<tbody>
+<tr><td>Match phrases of at least</td><td>6 words</td><td>6 words</td></tr>
+<tr><td>Report pairs that share at least</td><td>100 words (full papers); 20–40 (short answers)</td><td>same</td></tr>
+<tr><td>Allow up to … imperfect words in a row</td><td>0</td><td>2</td></tr>
+<tr><td>% of words that must match (More Options)</td><td>100</td><td>80</td></tr>
+<tr><td>Ignore letter case</td><td>off</td><td>on</td></tr>
+<tr><td>Ignore punctuation (or outer punctuation only)</td><td>off</td><td>outer punctuation on</td></tr>
+<tr><td>Ignore numbers</td><td>off</td><td>on</td></tr>
+<tr><td>Skip words longer than … characters</td><td>on, 20</td><td>on, 20</td></tr>
+</tbody>
+</table>
+</div>
+<p>Exact matching is fastest and gives the most clear-cut results. Allowing imperfections finds copying that someone tried to disguise, at some cost in speed.</p>
+
+<h2>Main window</h2>
+
+<h3 id="phrase">Match phrases of at least ___ words</h3>
+<p>The shortest run of matching words that WCopyfind counts as a match (1 to 999; default 6). With 6, a phrase must share at least six words in a row to count. Shorter phrases turn up by coincidence in almost any two documents on the same topic; much longer ones miss copying that was broken up by edits. Six is a good choice for most writing.</p>
+<p>To keep comparisons fast, WCopyfind begins its matches at words of four letters or more, so very short phrases made only of small words ("it is in the") are not found when the phrase length is above one.</p>
+
+<h3 id="threshold">Report pairs that share at least ___ matching words</h3>
+<p>A pair of documents is listed only if their exactly matching phrases add up to at least this many words (1 to 99,999; default 100). This keeps pairs with a stray shared phrase or two out of the results. There's no single right value: it depends on how long your documents are and how much shared text you consider worth a look. For full-length papers, 100 works well; for paragraph-length answers, try 20 to 40.</p>
+
+<h3 id="tolerance">Allow up to ___ imperfect words in a row</h3>
+<p>How many non-matching words WCopyfind will bridge to keep a match going (0 to 9; default 0). With 2, two copied passages separated by one or two changed, inserted, or deleted words are joined into one match, and the differing words are shown in italics in the report. With 0, only exact matches are found. Higher values find more disguised copying but make comparisons slower.</p>
+<p>This setting works together with the matching percentage below: set that to about 80 when you allow imperfections.</p>
+
+<h3 id="case">Ignore letter case</h3>
+<p>Treats "Whenever" and "whenever" as the same word. Matching usually increases a little. The report still shows the original capitalization.</p>
+
+<h3 id="punctuation">Ignore punctuation</h3>
+<p>Ignores all punctuation characters when comparing, so "don't" matches "dont" and "well-known" matches "wellknown". The report still shows the punctuation. Use it when you want to find matches despite changes in punctuation; leave it off for strict matching.</p>
+
+<h3 id="numbers">Ignore numbers</h3>
+<p>Ignores digits when comparing, so "8-fold" matches "10-fold" and "1935" matches "1936". Useful when copiers change dates or figures.</p>
+
+<h2>More Options</h2>
+<figure>
+<img class="shot" src="/img/wcopyfind-options.png" width="602" height="719" loading="lazy" alt="WCopyfind's More Options dialog, with matching, report, and tools settings" style="max-width:420px">
+</figure>
+
+<h3 id="percentage">% of words that must match</h3>
+<p>When a phrase includes imperfect words, at least this percentage of its words must match exactly (0 to 100; default 100). As WCopyfind extends a match across changed words, it stops if the proportion of exact matches drops below this value. Long, nearly identical passages are easily joined; short phrases with several changes are not, which keeps unrelated text from being stitched together. At 100, no imperfections are ever allowed, whatever the setting in the main window. <strong>Use 80 when allowing imperfections.</strong></p>
+
+<h3 id="outer">Ignore punctuation only at the start and end of words</h3>
+<p>A gentler version of <em>Ignore punctuation</em>: it removes punctuation around a word but not inside it. The sentence <em>"The box, which I found, is broken."</em> is compared as <em>The box which I found is broken</em>, while "don't" stays "don't". A good choice for finding matches despite minor editing. (It has no effect when <em>Ignore punctuation</em> is on.)</p>
+
+<h3 id="nonwords">Skip words that contain digits or symbols</h3>
+<p>Leaves out "words" containing anything other than letters, internal hyphens, and apostrophes, such as file names, web addresses, and formatting leftovers. They aren't used for matching, but they still appear in the report. If you turn this on, also turn on outer punctuation, so words next to quotation marks or commas aren't skipped.</p>
+
+<h3 id="long">Skip words longer than ___ characters</h3>
+<p>Leaves out words longer than this (default 20), which are almost always non-text such as web addresses, image data, and file names. Recommended unless your documents really contain very long words.</p>
+
+<h3 id="basic">Basic characters only</h3>
+<p>Discards words that contain accented or special characters. It was designed for old Word <code>.doc</code> files, whose internal clutter could look like text; with WCopyfind 6's improved reading of <code>.doc</code> files it's rarely needed. Leave it off for documents in languages other than English.</p>
+
+<h3 id="language">Language</h3>
+<p>Tells WCopyfind which characters count as letters and punctuation, and how capital letters work, in your documents' language. Choose the closest language on the list; English works reasonably well for most languages that use the Latin alphabet.</p>
+
+<h3 id="folder">Save reports in this folder</h3>
+<p>Where the reports are written. The default is <code>Documents\WCopyfind Reports</code>, and WCopyfind creates the folder if needed. Each comparison replaces the report already in the folder.</p>
+
+<h3 id="brief">Brief report</h3>
+<p>Makes the side-by-side pages show only the matching passages, one to a paragraph, instead of the full text of both documents. Brief reports are much smaller, which helps when a comparison finds thousands of pairs of long documents.</p>
+
+<h3 id="autoopen">Open the report in my browser when the comparison finishes</h3>
+<p>On by default. Turn it off if you'd rather open the report yourself with <em>Open Report</em>.</p>
+
+<h3 id="vocab">Make Vocabulary List</h3>
+<p>Writes a list of every word in all the documents in both lists, with how many times each appears, most frequent first. The ignore and skip settings apply, so turn on <em>Ignore letter case</em>, outer punctuation, and the skip options for a clean list. The file is plain text with one word per line, tab-separated from its count, ready to open in a spreadsheet. See <a href="/uses.html">interesting uses</a> for ideas.</p>
+
+<h3 id="defaults">Restore All Defaults</h3>
+<p>Returns every setting, including those in the main window, to its original value.</p>

@@ -35,3 +35,7 @@ ipch/
 
 # Log files
 *.log
+
+# Built websites (made by Websites/build.py)
+Websites/dist/
+__pycache__/

@@ -1,0 +1,119 @@
+<!--
+title: WCopyfind User Guide: How to Check Documents for Plagiarism
+description: A step-by-step guide to WCopyfind: choosing new and old documents, setting what counts as a match, running a comparison, and reading the side-by-side reports. Includes a five-minute walkthrough with sample documents.
+nav: User Guide
+help: yes
+schema: howto
+-->
+<h1>WCopyfind user guide</h1>
+<p class="lead">Everything you need to check a collection of documents for shared text, from your first comparison to a full class set.</p>
+
+<nav class="toc" aria-label="On this page">
+<p>On this page</p>
+<ol>
+<li><a href="#try">Try it in five minutes</a></li>
+<li><a href="#documents">Step 1: Choose the documents</a></li>
+<li><a href="#match">Step 2: Decide what counts as a match</a></li>
+<li><a href="#compare">Step 3: Compare and review</a></li>
+<li><a href="#papers">A workflow for checking student papers</a></li>
+<li><a href="#keys">Keyboard shortcuts</a></li>
+<li><a href="#where">Where WCopyfind keeps things</a></li>
+</ol>
+</nav>
+
+<div class="tip"><p><strong>Private by design.</strong> Everything in this guide happens on your own computer. WCopyfind never uploads your documents or sends them anywhere, so it's safe to use with student work and confidential material.</p></div>
+
+<h2 id="try">Try it in five minutes</h2>
+<p>The quickest way to understand WCopyfind is to watch it find planted copying.</p>
+<ol class="steps">
+<li><strong>Get the program and the samples.</strong> <a href="/download.html">Download WCopyfind</a> and <a href="/downloads/WCopyfind-Samples.zip">WCopyfind-Samples.zip</a>, and unzip both. The samples contain a <em>New Documents</em> folder with six student essays about the Dust Bowl, and an <em>Old Documents</em> folder with an encyclopedia article.</li>
+<li><strong>Start WCopyfind</strong> by double-clicking <code>WCopyfind.exe</code>.</li>
+<li><strong>Add the documents.</strong> Drag the <em>New Documents</em> folder onto the top list, and the <em>Old Documents</em> folder onto the bottom list.</li>
+<li><strong>Adjust two settings for these short essays.</strong> Set <em>Report pairs that share at least</em> to <strong>30</strong> matching words, and <em>Allow up to</em> <strong>2</strong> imperfect words in a row. Then click <strong>More Options</strong> and set the percentage of words that must match to <strong>80</strong>.</li>
+<li><strong>Click Compare Documents.</strong> In a moment WCopyfind reports three matching pairs:
+<ul>
+<li><em>Ben</em> copied two paragraphs from <em>Ava</em>, changing a few words.</li>
+<li><em>Chloe</em> copied two passages from the encyclopedia word for word.</li>
+<li><em>Elena</em> copied most of the encyclopedia with light edits.</li>
+</ul></li>
+<li><strong>Double-click a pair</strong> to see the two documents side by side. Click any highlighted passage to jump to its twin in the other document.</li>
+</ol>
+<figure>
+<img class="shot" src="/img/wcopyfind-window.png" width="1144" height="1067" loading="lazy" alt="WCopyfind after comparing the sample documents, listing three matching pairs">
+<figcaption>The sample documents after comparison: three pairs share at least 30 words.</figcaption>
+</figure>
+
+<h2 id="documents">Step 1: Choose the documents</h2>
+<p>WCopyfind has two lists, and the difference matters:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>List</th><th>Compared with</th><th>Put here</th></tr></thead>
+<tbody>
+<tr><td><strong>New documents</strong></td><td>each other <em>and</em> the old documents</td><td>The documents you're checking, such as this semester's papers</td></tr>
+<tr><td><strong>Old documents</strong></td><td>the new documents only, never each other</td><td>Sources, previous years' papers, published articles, and saved web pages that the new documents might have copied from</td></tr>
+</tbody>
+</table>
+</div>
+<p>Keeping reference material in the old list saves time and clutter: you don't need to know that two old papers share text, only whether a new paper shares text with any of them.</p>
+
+<h3>Adding documents</h3>
+<ul>
+<li><strong>Drag and drop</strong> files or folders from File Explorer onto either list. A folder adds all the documents inside it, including those in its subfolders.</li>
+<li><strong>Click Add Documents</strong> to choose files, or double-click an empty part of a list.</li>
+<li><strong>Click the arrow</strong> beside Add Documents (or right-click a list) for more: <em>Add a Folder</em>, <em>Load List from File</em>, <em>Save List to File</em>, <em>Sort by Name</em>, <em>Keep Sorted by Name</em>, <em>Move Selected</em> to the other list, <em>Remove Selected</em>, and <em>Clear All</em>.</li>
+</ul>
+<p>WCopyfind reads Word documents (<code>.docx</code> and <code>.doc</code>), plain text (<code>.txt</code>), web pages (<code>.htm</code>, <code>.html</code>), PDFs that contain text (see <a href="/download.html#pdf">reading PDF files</a>), and internet shortcuts (<code>.url</code>) to web pages. The lists are remembered, so they're still there the next time you start WCopyfind.</p>
+<div class="note"><p><strong>Tip:</strong> Save a list of your reference sources with <em>Save List to File</em>, and load it into the old list whenever you check a new batch of papers.</p></div>
+
+<h2 id="match">Step 2: Decide what counts as a match</h2>
+<p>Three numbers control what WCopyfind reports:</p>
+<ul>
+<li><strong>Match phrases of at least ___ words.</strong> The shortest run of matching words that counts. Shorter phrases, like "at the same time", appear in almost any two documents by chance; six words is a good default.</li>
+<li><strong>Report pairs that share at least ___ matching words.</strong> A pair of documents is listed only if their matching phrases add up to this many words. Use about 100 for full-length papers; lower it for short documents.</li>
+<li><strong>Allow up to ___ imperfect words in a row.</strong> With 0, only exact matches count. With 2, WCopyfind keeps a match going across one or two changed, added, or dropped words, which catches copying disguised by light editing. (Also lower the matching percentage in More Options to about 80.)</li>
+</ul>
+<p>The checkboxes make matching more forgiving: <strong>Ignore letter case</strong>, <strong>Ignore punctuation</strong>, and <strong>Ignore numbers</strong>. The rarer settings, and the report folder, are under <strong>More Options</strong>. Every setting is explained, with recommended values, on the <a href="/settings.html">settings page</a>.</p>
+
+<h2 id="compare">Step 3: Compare and review</h2>
+<p>Click <strong>Compare Documents</strong>. WCopyfind reads each document, then compares every pair that should be compared. The button changes to <strong>Stop</strong>, a progress bar shows how far it has gone, and matching pairs appear in the list as they're found. If you stop early, you keep the pairs found so far.</p>
+<p>Each row in the results shows:</p>
+<ul>
+<li><strong>Matching words</strong>: how many words are in phrases the two documents share exactly</li>
+<li><strong>% of A</strong> and <strong>% of B</strong>: what fraction of each document those words make up</li>
+<li><strong>Document A</strong> and <strong>Document B</strong>: the two documents (with their folder, if two documents have the same name)</li>
+</ul>
+<p>Click a column heading to sort, for example by <em>% of A</em> to put the most heavily copied documents at the top. Double-click a pair, or select it and press <kbd>Enter</kbd>, to open it side by side. <strong>Open Report</strong> opens the full report in your browser; WCopyfind also opens it automatically when a comparison finishes. <a href="/reports.html">How to read the reports →</a></p>
+<p>If a document can't be read (it may be damaged, protected, or open in another program), WCopyfind leaves it out, carries on with the rest, and lists it in the report.</p>
+
+<h2 id="papers">A workflow for checking student papers</h2>
+<ol>
+<li><strong>Collect the papers as files</strong>, ideally Word documents, named so you can tell who wrote each one (for example, "Lastname Firstname.docx"). Put them all in one folder.</li>
+<li><strong>Gather reference material</strong> into a second folder: papers from previous years, the sources students were likely to use, and any web pages you suspect (save them as web pages, or make internet shortcuts to them).</li>
+<li><strong>Remove text every paper shares legitimately.</strong> If students pasted the assignment prompt or a required template into their papers, every pair will match on it. Delete it from the papers, or raise <em>Report pairs that share at least</em> above its length.</li>
+<li><strong>Start with the defaults</strong> (6 words, 100 words, no imperfections), then look again with imperfections allowed (2, with 80% matching) to catch lightly edited copying.</li>
+<li><strong>Sort by percentage</strong> and read the top pairs side by side.</li>
+<li><strong>Judge each match yourself.</strong> Shared text isn't always plagiarism: properly quoted and cited passages, common phrases, and shared sources all create matches. WCopyfind shows you where to look; deciding what it means is up to you. See <a href="/about-plagiarism.html">about plagiarism</a>.</li>
+</ol>
+
+<h2 id="keys">Keyboard shortcuts</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Where</th><th>Key</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td>Document lists</td><td><kbd>Delete</kbd></td><td>Remove the selected documents</td></tr>
+<tr><td>Document lists</td><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>Select all</td></tr>
+<tr><td>Results list</td><td><kbd>Enter</kbd></td><td>Open the selected pair side by side</td></tr>
+<tr><td>Results list</td><td><kbd>Delete</kbd></td><td>Remove the selected pairs from the list</td></tr>
+<tr><td>Settings boxes</td><td><kbd>Enter</kbd></td><td>Compare Documents</td></tr>
+<tr><td>Side-by-side report</td><td><kbd>N</kbd> / <kbd>P</kbd></td><td>Next / previous matching passage</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="where">Where WCopyfind keeps things</h2>
+<ul>
+<li><strong>Reports</strong> go in the report folder, <code>Documents\WCopyfind Reports</code> unless you choose another in More Options. Each comparison replaces the previous report in that folder, so copy a report elsewhere if you want to keep it.</li>
+<li><strong>Settings and document lists</strong> are saved in your Windows user profile (in the registry, under <code>HKEY_CURRENT_USER\Software\WCopyfind</code>).</li>
+<li><strong>Your documents</strong> stay exactly where they are. WCopyfind only reads them; it never changes, moves, or uploads them.</li>
+</ul>
+<p>To uninstall WCopyfind, delete <code>WCopyfind.exe</code>. You can also delete the report folder.</p>

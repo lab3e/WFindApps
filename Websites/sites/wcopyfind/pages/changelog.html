@@ -1,0 +1,71 @@
+<!--
+title: WCopyfind Version History
+description: What changed in each version of WCopyfind, from the redesigned WCopyfind 6 back to version 2.7.
+nav: Download
+help: yes
+-->
+<h1>Version history</h1>
+
+<h2>6.0.2 · September 2026</h2>
+<ul>
+<li>A new program icon: two pages with the same highlighted phrase, linked, replacing the generic icon WCopyfind had used since it was first written.</li>
+</ul>
+
+<h2>6.0.1 · September 2026</h2>
+<ul>
+<li>Licensed under the GNU General Public License, version 3 or later (earlier versions: version 2 or later), with a link to the source code in the About box.</li>
+</ul>
+
+<h2>6.0.0 · September 2026</h2>
+<h3>A new window</h3>
+<ul>
+<li>Three numbered steps: choose the documents, decide what counts as a match, compare. The window can be resized, and the lists grow to fill it.</li>
+<li>Document lists show each document's name and folder, with counts, and are remembered between sessions.</li>
+<li>Documents and whole folders (with subfolders) can be dropped onto either list, and shortcuts are followed.</li>
+<li>Add Documents has a menu to add a folder, load and save lists, sort by name in natural order ("paper2" before "paper10"), move documents between lists, and clear lists.</li>
+<li>Comparisons run in the background with a progress bar and a Stop button, and matching pairs appear as they're found. Results can be sorted by any column.</li>
+<li>Less-used settings and the vocabulary tool moved to More Options. The report folder is created automatically.</li>
+<li>Settings from WCopyfind 5 and earlier are carried over on first run.</li>
+<li>A document that can't be read is skipped and listed, instead of stopping the whole comparison.</li>
+</ul>
+<h3>New reports</h3>
+<ul>
+<li>A report index that can be filtered by name and sorted by any column, with bars showing how much of each document matches.</li>
+<li>One side-by-side page per pair, replacing three files per pair and the old HTML frames: highlighted passages in matching colors, click to jump to the twin, next and previous match, a matches-only view, dark mode, and clean printing.</li>
+<li>Words skipped by the filters now appear in the reports instead of disappearing.</li>
+<li><code>matches.txt</code> keeps its format, now in UTF-8.</li>
+</ul>
+<h3>Fixes</h3>
+<ul>
+<li>The first-run defaults for the report folder and language were cut to one character, so the first comparison on a new computer failed.</li>
+<li>Settings and saved lists lost accented and non-English characters.</li>
+<li>Loading a list cut the last character off its final line.</li>
+<li>Report pages of documents with the same name in different folders overwrote each other.</li>
+<li>The vocabulary tool froze the window and ignored the Basic Characters setting; it now writes UTF-8, most frequent words first.</li>
+<li>Word <code>.doc</code> files now use Windows' own reader, as intended, for more accurate text.</li>
+<li>Imperfect matches could absorb flaws only at the start of a phrase when one imperfection was allowed.</li>
+</ul>
+
+<h2>5.0.0 · February 2026</h2>
+<ul>
+<li>Updated to current Windows development tools (Visual Studio 2022+, C++20).</li>
+<li>Fifteen bugs fixed, including memory and resource leaks, a PDF reading error, and dropped characters in <code>.doc</code> files.</li>
+<li>Better reading of Word <code>.doc</code> files.</li>
+<li>First version published on GitHub.</li>
+</ul>
+
+<h2>4.1.5 · April 2016</h2>
+<ul>
+<li>Comparison counters became 64-bit, so they can count billions of comparisons.</li>
+<li>Fixed running out of input streams when reading hundreds of <code>.docx</code> files.</li>
+</ul>
+
+<h2>Earlier versions</h2>
+<ul>
+<li><strong>4.1.2–4.1.4</strong> (June 2014), alongside the first release of the command-line Copyfind</li>
+<li><strong>4.1.1</strong> (March 2012), the first with a 64-bit edition</li>
+<li><strong>4.1.0</strong> (October 2011)</li>
+<li><strong>3.0–3.0.2</strong> (June–August 2011)</li>
+<li><strong>2.7</strong></li>
+</ul>
+<p>Older versions can still be <a href="/download.html#older">downloaded</a>.</p>

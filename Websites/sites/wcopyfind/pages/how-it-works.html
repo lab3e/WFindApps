@@ -1,0 +1,32 @@
+<!--
+title: How WCopyfind Works: Fast Text Matching Explained
+description: How WCopyfind compares hundreds of documents in seconds: turning words into numbers, sorting them, finding shared words by merging sorted lists, and growing matching phrases across small differences.
+nav: How It Works
+help: yes
+schema: article
+-->
+<h1>How WCopyfind works</h1>
+<p class="lead">How can a program compare hundreds of documents, every one against every other, in a few seconds? The trick is to avoid comparing text directly at all.</p>
+
+<h2>1. Words become numbers</h2>
+<p>WCopyfind reads each document one word at a time. After applying your settings (ignoring case, punctuation, or numbers, and skipping non-words), it turns each word into a 32-bit number called a <em>hash code</em>, computed from the word's letters. The same word always gets the same number, and different words almost always get different numbers. From then on, WCopyfind never looks at letters again: comparing two numbers is much faster than comparing two words.</p>
+<p>Each document becomes a list of numbers in reading order, and WCopyfind also makes a second copy of that list sorted from smallest to largest, remembering where in the document each number came from.</p>
+
+<h2>2. Shared words are found by merging</h2>
+<p>To compare two documents, WCopyfind walks through their two sorted lists together, the way you would merge two sorted decks of cards. Whenever it finds the same number in both, the two documents share that word, and it notes where the word appears in each. This finds every shared word in a single pass through both lists, instead of checking each word of one document against each word of the other.</p>
+<p>Very short words such as "a", "the", and "of" appear everywhere, so WCopyfind doesn't start matches from words of three letters or fewer. Any matching phrase long enough to count almost always contains a longer word to start from.</p>
+
+<h2>3. Matches grow into phrases</h2>
+<p>Each shared word is a possible starting point. From there, WCopyfind looks at the words before and after it in both documents (now in reading order) and extends the match as long as the words keep agreeing. The result is the longest phrase the two documents share around that word.</p>
+<p>If you allow imperfections, WCopyfind keeps going across small differences: a changed word, or a word added or dropped in one copy. It tallies each such flaw and stops when there are more flaws in a row than you allow, or when the share of exactly matching words falls below your minimum percentage. The percentage rule means long, nearly identical passages are easily joined, while short phrases with several differences are not, which stops unrelated text from being stitched together.</p>
+<p>A phrase is kept if it contains at least as many exactly matching words as your <em>Match phrases of at least</em> setting. Its words are then marked as used, so the same text isn't counted twice.</p>
+
+<h2>4. Pairs are reported</h2>
+<p>When all the shared words of a pair have been tried, WCopyfind adds up the words in its matching phrases. If the total reaches your <em>Report pairs that share at least</em> setting, it writes a side-by-side page for the pair, marking each phrase so that both documents can be highlighted and linked.</p>
+
+<h2>Why it's fast</h2>
+<p>Sorting each document once, and then merging sorted lists, means the work of comparing two documents grows roughly with their length, not with the product of their lengths. Most of the time goes into the pairs that actually share text; unrelated pairs are dismissed almost immediately. That's why a class set of papers takes seconds.</p>
+
+<h2>Where the code is</h2>
+<p>WCopyfind is written in C++. The comparison engine is in <code>WCopyfind/clib/CompareDocuments.cpp</code> in the <a href="{{github}}">source code on GitHub</a>, and the document reading and word handling it shares with WRepeatfind are in the <code>Common</code> folder. Lou Bloomfield's original <a href="{{old_site}}/How_WCopyfind_and_Copyfind_Work.pdf">explanation of how WCopyfind and Copyfind work</a> (PDF) describes the same approach in more detail.</p>
+<p>WCopyfind's companion, WRepeatfind, turns this engine inward to find repetition within one document. <a href="{{wrf}}/how-it-works.html">See how that works</a>.</p>

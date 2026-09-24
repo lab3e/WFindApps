@@ -11,7 +11,7 @@
 #include <vector>
 #include "resource.h"
 
-#define WCOPYFIND_VERSION L"6.0.0"
+#define WCOPYFIND_VERSION L"6.0.1"
 #ifdef _WIN64
 #define WCOPYFIND_NAME L"WCopyfind " WCOPYFIND_VERSION
 #else

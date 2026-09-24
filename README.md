@@ -27,4 +27,4 @@ In short: anyone may use, study, share, and change these programs. Anyone who di
 
 The bundled [miniz](Common/miniz) library, by Rich Geldreich, RAD Game Tools, Valve Software, and contributors, keeps its own MIT license, which is stated in its source files.
 
-Releases before 6.0.0 (tags `WCopyfind-4.1.5` and `WCopyfind-5.0.0`) were published under GPL version 2 or later.
+WCopyfind releases through 6.0.0 (tags `WCopyfind-4.1.5`, `WCopyfind-5.0.0`, `WCopyfind-6.0.0`) were published under GPL version 2 or later. WRepeatfind 1.0.0 carried no license notice; version 3 or later applies from WRepeatfind 1.0.1 and WCopyfind 6.0.1 on.

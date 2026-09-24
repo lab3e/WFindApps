@@ -1,8 +1,11 @@
-# WCopyfind 6.0.0
+# WCopyfind 6.0.1
 
 WCopyfind is a C++/MFC program for Windows that compares collections of documents to discover if they share phrases. It is used for detecting plagiarism and for finding common passages across large sets of text files.
 
 Web site: https://WCopyfind.WFindApps.org
+
+## What's new in 6.0.1
+- Licensed under the GNU General Public License, version 3 or later (6.0.0 and earlier: version 2 or later), with the license text in `LICENSE` and a link to the source code in the About box
 
 ## What's new in 6.0.0
 
@@ -89,7 +92,7 @@ Web site: https://WCopyfind.WFindApps.org
 - `..\Common` — document reading, word filters and hashing, sorting, miniz, and the dialog layout helper shared with WRepeatfind
 
 ## License
-Copyright (C) 2026 Louis A. Bloomfield. WCopyfind is free software under the GNU General Public License, version 3 or later; see [LICENSE](../LICENSE). Versions before 6.0.0 were published under version 2 or later.
+Copyright (C) 2026 Louis A. Bloomfield. WCopyfind is free software under the GNU General Public License, version 3 or later; see [LICENSE](../LICENSE). Versions through 6.0.0 were published under version 2 or later.
 
 ## Building
 Open `WCopyfind.sln` (in the repository root) in Visual Studio 2022 or later with the **Desktop development with C++** workload and the **MFC** optional component installed. Build the Release x64 configuration. Each program builds into its own `x64\Release` folder.

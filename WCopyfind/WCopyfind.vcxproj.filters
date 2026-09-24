@@ -53,28 +53,28 @@
     <ClInclude Include="clib\CompareDocuments.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="clib\HeapSort.h">
+    <ClInclude Include="..\Common\HeapSort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="clib\InputDocument.h">
+    <ClInclude Include="..\Common\InputDocument.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="clib\Words.h">
+    <ClInclude Include="..\Common\Words.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="miniz\miniz.h">
+    <ClInclude Include="..\Common\miniz\miniz.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="miniz\miniz_common.h">
+    <ClInclude Include="..\Common\miniz\miniz_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="miniz\miniz_tdef.h">
+    <ClInclude Include="..\Common\miniz\miniz_tdef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="miniz\miniz_tinfl.h">
+    <ClInclude Include="..\Common\miniz\miniz_tinfl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="miniz\miniz_zip.h">
+    <ClInclude Include="..\Common\miniz\miniz_zip.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -100,25 +100,25 @@
     <ClCompile Include="clib\CompareDocuments.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="clib\HeapSort.cpp">
+    <ClCompile Include="..\Common\HeapSort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="clib\InputDocument.cpp">
+    <ClCompile Include="..\Common\InputDocument.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="clib\Words.cpp">
+    <ClCompile Include="..\Common\Words.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="miniz\miniz.c">
+    <ClCompile Include="..\Common\miniz\miniz.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="miniz\miniz_tdef.c">
+    <ClCompile Include="..\Common\miniz\miniz_tdef.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="miniz\miniz_tinfl.c">
+    <ClCompile Include="..\Common\miniz\miniz_tinfl.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="miniz\miniz_zip.c">
+    <ClCompile Include="..\Common\miniz\miniz_zip.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -7,8 +7,8 @@
 #include "afxdialogex.h"
 #include "afxwin.h"
 #include <atomic>
-#include "clib\InputDocument.h"
-#include "clib\Words.h"
+#include "InputDocument.h"
+#include "Words.h"
 #include "clib\CompareDocuments.h"
 #include "UiThread.h"
 #include "WCopyfind.h"

@@ -44,5 +44,13 @@ This version (5.0.0) is a modernization of WCopyfind 4.1.5, a program that had n
 - `.htm` / `.html` — web pages
 - URLs — fetched via WinINet
 
+### Later fixes
+- Fixed imperfect-match extension stopping one flaw early when growing a phrase forward (`Flaws == m_MismatchTolerance` instead of `>`), so that "Most Imperfections to Allow" now applies equally in both directions; with a setting of 1, phrases could previously absorb a flaw only at their start
+
+## Repository layout
+- `WCopyfind\` — this program
+- `WRepeatfind\` — a companion program that finds repeated phrases within one document or book (see its README)
+- `Common\` — code shared by both programs: document reading (`InputDocument`), word filters and hashing (`Words`), sorting (`HeapSort`), and miniz
+
 ## Building
-Open `WCopyfind.sln` in Visual Studio 2022 or later with the **Desktop development with C++** workload and the **MFC** optional component installed. Build the Release x64 configuration.
+Open `WCopyfind.sln` (in the repository root) in Visual Studio 2022 or later with the **Desktop development with C++** workload and the **MFC** optional component installed. Build the Release x64 configuration. Each program builds into its own `x64\Release` folder.

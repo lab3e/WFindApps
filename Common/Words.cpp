@@ -1,5 +1,5 @@
 ﻿//
-#include "..\stdafx.h"
+#include "stdafx.h"	// the including project's stdafx.h, found via its include path
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

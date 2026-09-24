@@ -436,7 +436,7 @@ int CCompareDocuments::ComparePair(Document *DocL,Document *DocR)
 						}
 
 						Flaws++;
-						if( Flaws == m_MismatchTolerance ) break;	// check for maximum flaws reached
+						if( Flaws > m_MismatchTolerance ) break;	// check for maximum flaws reached
 							
 						if( (LastL+1) < DocL->m_WordsTotal )		// check one word later on left (if it exists)
 						{
@@ -1003,7 +1003,7 @@ int CCompareDocuments::ComparePairFiltered(Document *DocL,Document *DocR,Documen
 						}
 
 						Flaws++;
-						if( Flaws == m_MismatchTolerance ) break;	// check for maximum flaws reached
+						if( Flaws > m_MismatchTolerance ) break;	// check for maximum flaws reached
 							
 						if( (LastL+1) < DocL->m_WordsTotal )		// check one word later on left (if it exists)
 						{

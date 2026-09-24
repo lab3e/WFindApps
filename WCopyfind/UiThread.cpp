@@ -6,8 +6,8 @@
 #include <sys/stat.h>
 #include <locale.h>
 #include "WCopyfind.h"
-#include "clib\InputDocument.h"
-#include "clib\Words.h"
+#include "InputDocument.h"
+#include "Words.h"
 #include "clib\CompareDocuments.h"
 #include "UiThread.h"
 #include "WCopyfindDlg.h"

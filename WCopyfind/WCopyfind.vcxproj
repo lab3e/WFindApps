@@ -75,18 +75,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -95,6 +97,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -118,6 +121,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -142,6 +146,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -169,6 +174,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -194,9 +200,9 @@
   <ItemGroup>
     <ClInclude Include="AbortDlg.h" />
     <ClInclude Include="clib\CompareDocuments.h" />
-    <ClInclude Include="clib\HeapSort.h" />
-    <ClInclude Include="clib\InputDocument.h" />
-    <ClInclude Include="clib\Words.h" />
+    <ClInclude Include="..\Common\HeapSort.h" />
+    <ClInclude Include="..\Common\InputDocument.h" />
+    <ClInclude Include="..\Common\Words.h" />
     <ClInclude Include="FileDropListCtrl.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -204,18 +210,18 @@
     <ClInclude Include="UiThread.h" />
     <ClInclude Include="WCopyfind.h" />
     <ClInclude Include="WCopyfindDlg.h" />
-    <ClInclude Include="miniz\miniz.h" />
-    <ClInclude Include="miniz\miniz_common.h" />
-    <ClInclude Include="miniz\miniz_tdef.h" />
-    <ClInclude Include="miniz\miniz_tinfl.h" />
-    <ClInclude Include="miniz\miniz_zip.h" />
+    <ClInclude Include="..\Common\miniz\miniz.h" />
+    <ClInclude Include="..\Common\miniz\miniz_common.h" />
+    <ClInclude Include="..\Common\miniz\miniz_tdef.h" />
+    <ClInclude Include="..\Common\miniz\miniz_tinfl.h" />
+    <ClInclude Include="..\Common\miniz\miniz_zip.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AbortDlg.cpp" />
     <ClCompile Include="clib\CompareDocuments.cpp" />
-    <ClCompile Include="clib\HeapSort.cpp" />
-    <ClCompile Include="clib\InputDocument.cpp" />
-    <ClCompile Include="clib\Words.cpp" />
+    <ClCompile Include="..\Common\HeapSort.cpp" />
+    <ClCompile Include="..\Common\InputDocument.cpp" />
+    <ClCompile Include="..\Common\Words.cpp" />
     <ClCompile Include="FileDropListCtrl.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -226,10 +232,10 @@
     <ClCompile Include="UiThread.cpp" />
     <ClCompile Include="WCopyfind.cpp" />
     <ClCompile Include="WCopyfindDlg.cpp" />
-    <ClCompile Include="miniz\miniz.c" />
-    <ClCompile Include="miniz\miniz_tdef.c" />
-    <ClCompile Include="miniz\miniz_tinfl.c" />
-    <ClCompile Include="miniz\miniz_zip.c" />
+    <ClCompile Include="..\Common\miniz\miniz.c" />
+    <ClCompile Include="..\Common\miniz\miniz_tdef.c" />
+    <ClCompile Include="..\Common\miniz\miniz_tinfl.c" />
+    <ClCompile Include="..\Common\miniz\miniz_zip.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="WCopyfind.rc" />

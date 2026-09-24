@@ -1,8 +1,8 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "..\miniz\miniz.h"
-#include "..\miniz\miniz_zip.h"
+#include "miniz\miniz.h"
+#include "miniz\miniz_zip.h"
 #include <filter.h>
 #include <ntquery.h>
 

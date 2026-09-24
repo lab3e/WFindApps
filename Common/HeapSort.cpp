@@ -2,7 +2,7 @@
 // Purpose: Sorts two tables together to put the first table in numerical order
 // Rewritten to use std::sort to eliminate 1-based indexing UB.
 
-#include "..\stdafx.h"
+#include "stdafx.h"	// the including project's stdafx.h, found via its include path
 #include <algorithm>
 #include <vector>
 #include "HeapSort.h"

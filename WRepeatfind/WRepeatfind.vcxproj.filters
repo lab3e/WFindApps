@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{7A1C1B7E-2A4B-4E55-9F0B-1D2C3E4F5A61}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{8B2D2C8F-3B5C-4F66-A01C-2E3D4F5A6B72}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{9C3E3D90-4C6D-4077-B12D-3F4E5A6B7C83}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{AD4F4EA1-5D7E-4188-C23E-4A5B6C7D8E94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\miniz">
+      <UniqueIdentifier>{BE505FB2-6E8F-4299-D34F-5B6C7D8E9FA5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DialogLayout.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="MainDlg.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="OptionsDlg.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="PasteDlg.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="RepeatFinder.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="resource.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="stdafx.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="targetver.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="WRepeatfind.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="..\Common\HeapSort.h"><Filter>Common</Filter></ClInclude>
+    <ClInclude Include="..\Common\InputDocument.h"><Filter>Common</Filter></ClInclude>
+    <ClInclude Include="..\Common\Words.h"><Filter>Common</Filter></ClInclude>
+    <ClInclude Include="..\Common\miniz\miniz.h"><Filter>Common\miniz</Filter></ClInclude>
+    <ClInclude Include="..\Common\miniz\miniz_common.h"><Filter>Common\miniz</Filter></ClInclude>
+    <ClInclude Include="..\Common\miniz\miniz_tdef.h"><Filter>Common\miniz</Filter></ClInclude>
+    <ClInclude Include="..\Common\miniz\miniz_tinfl.h"><Filter>Common\miniz</Filter></ClInclude>
+    <ClInclude Include="..\Common\miniz\miniz_zip.h"><Filter>Common\miniz</Filter></ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MainDlg.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="OptionsDlg.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="PasteDlg.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="RepeatFinder.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="RepeatReport.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="stdafx.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="WRepeatfind.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="..\Common\HeapSort.cpp"><Filter>Common</Filter></ClCompile>
+    <ClCompile Include="..\Common\InputDocument.cpp"><Filter>Common</Filter></ClCompile>
+    <ClCompile Include="..\Common\Words.cpp"><Filter>Common</Filter></ClCompile>
+    <ClCompile Include="..\Common\miniz\miniz.c"><Filter>Common\miniz</Filter></ClCompile>
+    <ClCompile Include="..\Common\miniz\miniz_tdef.c"><Filter>Common\miniz</Filter></ClCompile>
+    <ClCompile Include="..\Common\miniz\miniz_tinfl.c"><Filter>Common\miniz</Filter></ClCompile>
+    <ClCompile Include="..\Common\miniz\miniz_zip.c"><Filter>Common\miniz</Filter></ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WRepeatfind.rc"><Filter>Resource Files</Filter></ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\WRepeatfind.ico"><Filter>Resource Files</Filter></Image>
+  </ItemGroup>
+</Project>

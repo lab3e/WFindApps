@@ -1,0 +1,137 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+#include "winres.h"
+#include "afxres.h"
+#undef APSTUDIO_READONLY_SYMBOLS
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+IDR_MAINFRAME           ICON                    "res\\WRepeatfind.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+// Main dialog
+
+IDD_WREPEATFIND_DIALOG DIALOGEX 0, 0, 420, 344
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW | WS_EX_ACCEPTFILES
+CAPTION "WRepeatfind"
+FONT 9, "Segoe UI", 400, 0, 0x1
+BEGIN
+    LTEXT           "1   Choose what to check",IDC_STATIC_STEP1,10,8,300,11
+    LTEXT           "Add documents, drag them into this window, or paste text. For a book, list the chapters in order.",IDC_STATIC_HINT1,10,21,330,9
+    CONTROL         "",IDC_LIST_DOCS,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,10,33,330,88
+    PUSHBUTTON      "&Add Documents...",IDC_BUTTON_ADD,348,33,64,14
+    PUSHBUTTON      "&Paste Text...",IDC_BUTTON_PASTE,348,50,64,14
+    PUSHBUTTON      "&Remove",IDC_BUTTON_REMOVE,348,73,64,14
+    PUSHBUTTON      "Move &Up",IDC_BUTTON_UP,348,90,64,14
+    PUSHBUTTON      "Move Do&wn",IDC_BUTTON_DOWN,348,107,64,14
+    CONTROL         "Check the documents together as one &work (for example, the chapters of a book)",IDC_CHECK_ONEWORK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,126,330,10
+
+    LTEXT           "2   Decide what counts as a repeat",IDC_STATIC_STEP2,10,146,300,11
+    LTEXT           "Report phrases of at least",IDC_STATIC_PHRASE1,10,163,86,9
+    EDITTEXT        IDC_EDIT_PHRASE,97,161,30,12,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN_PHRASE,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,127,161,10,12
+    LTEXT           "words",IDC_STATIC_PHRASE2,131,163,24,9
+    LTEXT           "Allow up to",IDC_STATIC_TOLERANCE1,170,163,40,9
+    EDITTEXT        IDC_EDIT_TOLERANCE,211,161,26,12,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN_TOLERANCE,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,237,161,10,12
+    LTEXT           "differing words in a row",IDC_STATIC_TOLERANCE2,241,163,95,9
+    CONTROL         "Ignore letter &case",IDC_CHECK_IGNORE_CASE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,180,78,10
+    CONTROL         "Ignore p&unctuation",IDC_CHECK_IGNORE_PUNCTUATION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,96,180,82,10
+    CONTROL         "Ignore &numbers",IDC_CHECK_IGNORE_NUMBERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,186,180,70,10
+    PUSHBUTTON      "More &Options...",IDC_BUTTON_OPTIONS,348,177,64,14
+
+    DEFPUSHBUTTON   "&Find Repeats",IDC_BUTTON_FIND,10,200,90,20
+    LTEXT           "",IDC_STATIC_STATUS,108,202,304,9,SS_ENDELLIPSIS
+    CONTROL         "",IDC_PROGRESS,"msctls_progress32",NOT WS_VISIBLE,108,213,304,6
+
+    LTEXT           "3   Review the repeats",IDC_STATIC_STEP3,10,230,300,11
+    CONTROL         "",IDC_LIST_RESULTS,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,10,243,402,76
+    LTEXT           "Double-click a repeat to see it in the report, where you can also dismiss it.",IDC_STATIC_HINT3,10,326,330,9
+    PUSHBUTTON      "Open &Report",IDC_BUTTON_REPORT,348,323,64,14
+END
+
+/////////////////////////////////////////////////////////////////////////////
+// Paste Text dialog
+
+IDD_PASTE DIALOGEX 0, 0, 360, 250
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MAXIMIZEBOX
+CAPTION "Paste Text"
+FONT 9, "Segoe UI", 400, 0, 0x1
+BEGIN
+    LTEXT           "&Name:",IDC_STATIC_TITLE,10,11,26,9
+    EDITTEXT        IDC_EDIT_TITLE,38,9,180,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Paste from &Clipboard",IDC_BUTTON_CLIPBOARD,262,8,88,14
+    LTEXT           "Paste or type the text to check:",IDC_STATIC_TEXT,10,30,200,9
+    EDITTEXT        IDC_EDIT_TEXT,10,41,340,178,ES_MULTILINE | ES_WANTRETURN | ES_AUTOVSCROLL | ES_NOHIDESEL | WS_VSCROLL
+    LTEXT           "",IDC_STATIC_WORDCOUNT,10,230,150,9
+    DEFPUSHBUTTON   "Add",IDOK,246,226,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,300,226,50,14
+END
+
+/////////////////////////////////////////////////////////////////////////////
+// More Options dialog
+
+IDD_OPTIONS DIALOGEX 0, 0, 300, 236
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "More Options"
+FONT 9, "Segoe UI", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Matching",IDC_STATIC,8,6,284,112
+    LTEXT           "When a phrase has differing words, at least",IDC_STATIC,16,21,150,9
+    EDITTEXT        IDC_EDIT_PERCENTAGE,167,19,30,12,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN_PERCENTAGE,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,197,19,10,12
+    LTEXT           "% of its words must match",IDC_STATIC,201,21,88,9
+    CONTROL         "Ignore punctuation only at the start and end of words (used when ""Ignore punctuation"" is off)",IDC_CHECK_OUTER_PUNCTUATION,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,16,37,270,18
+    CONTROL         "Skip words that contain digits or symbols",IDC_CHECK_SKIP_NONWORDS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,58,200,10
+    CONTROL         "Skip words longer than",IDC_CHECK_SKIP_LONG,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,73,90,10
+    EDITTEXT        IDC_EDIT_SKIP_LENGTH,107,71,30,12,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN_SKIP_LENGTH,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,137,71,10,12
+    LTEXT           "characters",IDC_STATIC,141,73,50,9
+    CONTROL         "Basic characters only (discard words with accented or special characters)",IDC_CHECK_BASIC_CHARACTERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,88,270,10
+    LTEXT           "Language:",IDC_STATIC,16,103,40,9
+    COMBOBOX        IDC_COMBO_LANGUAGE,58,101,110,200,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+
+    GROUPBOX        "Report",IDC_STATIC,8,124,284,66
+    LTEXT           "Save reports in this folder:",IDC_STATIC,16,138,200,9
+    EDITTEXT        IDC_EDIT_FOLDER,16,150,208,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Browse...",IDC_BUTTON_FOLDER,230,149,54,14
+    CONTROL         "&Open the report in my browser when repeats are found",IDC_CHECK_AUTO_OPEN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,170,260,10
+
+    PUSHBUTTON      "Restore All &Defaults",IDC_BUTTON_DEFAULTS,8,212,82,14
+    DEFPUSHBUTTON   "OK",IDOK,188,212,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,242,212,50,14
+END
+
+/////////////////////////////////////////////////////////////////////////////
+// Version
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "FileDescription", "WRepeatfind - finds repeated phrases within documents"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "WRepeatfind.exe"
+            VALUE "OriginalFilename", "WRepeatfind.exe"
+            VALUE "ProductName", "WRepeatfind"
+            VALUE "ProductVersion", "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

@@ -505,6 +505,7 @@ void CMainDlg::OnButtonFind()
 
 void CMainDlg::Work(HWND hwnd, CRepeatFinder* finder, std::vector<CString> documents, CString language, CString reportPath)
 {
+	CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);		// the .doc reader uses COM (IFilter)
 	_wsetlocale(LC_ALL, language);
 	auto post = [hwnd](int percent, const CString& status) { ::PostMessage(hwnd, WU_PROGRESS, percent, (LPARAM)new CString(status)); };
 
@@ -538,6 +539,7 @@ void CMainDlg::Work(HWND hwnd, CRepeatFinder* finder, std::vector<CString> docum
 	}
 	if(result > -1 && message.IsEmpty()) message = CRepeatFinder::ErrorMessage(result).c_str();
 	::PostMessage(hwnd, WU_DONE, (WPARAM)result, (LPARAM)new CString(message));
+	CoUninitialize();
 }
 
 LRESULT CMainDlg::OnProgress(WPARAM wParam, LPARAM lParam)

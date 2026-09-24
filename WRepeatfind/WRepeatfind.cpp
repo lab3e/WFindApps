@@ -34,6 +34,7 @@ BOOL CWRepeatfindApp::InitInstance()
 
 	CWinApp::InitInstance();
 	AfxEnableControlContainer();
+	CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);		// the .doc reader uses COM (IFilter)
 
 	SetRegistryKey(L"WRepeatfind");
 	LoadSettings();

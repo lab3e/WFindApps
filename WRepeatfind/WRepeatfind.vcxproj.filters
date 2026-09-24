@@ -21,7 +21,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DialogLayout.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="..\Common\DialogLayout.h"><Filter>Common</Filter></ClInclude>
     <ClInclude Include="MainDlg.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="OptionsDlg.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="PasteDlg.h"><Filter>Header Files</Filter></ClInclude>

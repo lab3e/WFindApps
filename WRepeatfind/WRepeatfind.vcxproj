@@ -98,7 +98,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DialogLayout.h" />
+    <ClInclude Include="..\Common\DialogLayout.h" />
     <ClInclude Include="MainDlg.h" />
     <ClInclude Include="OptionsDlg.h" />
     <ClInclude Include="PasteDlg.h" />

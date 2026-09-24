@@ -17,7 +17,7 @@ void WordRemovePunctuation(wchar_t *word)
 	int ccnt;
 	int icnt;
 	
-	wordlen=wcslen(word);
+	wordlen=(int)wcslen(word);
 	for(ccnt=0;ccnt<wordlen;ccnt++)
 	{
 		if(iswpunct(word[ccnt]))
@@ -35,7 +35,7 @@ void wordxouterpunct(wchar_t *word)
 	int ccnt;
 	int icnt;
 	
-	wordlen=wcslen(word);
+	wordlen=(int)wcslen(word);
 	for(ccnt=0;ccnt<wordlen;ccnt++)
 	{
 		if(iswpunct(word[ccnt]))
@@ -63,7 +63,7 @@ void WordRemoveNumbers(wchar_t *word)
 	int ccnt;
 	int icnt;
 	
-	wordlen=wcslen(word);
+	wordlen=(int)wcslen(word);
 	for(ccnt=0;ccnt<wordlen;ccnt++)
 	{
 		if(iswdigit(word[ccnt]))
@@ -80,7 +80,7 @@ void WordToLowerCase(wchar_t *word)
 	int wordlen;
 	int ccnt;
 
-	wordlen=wcslen(word);
+	wordlen=(int)wcslen(word);
 	for(ccnt=0;ccnt<wordlen;ccnt++)
 	{
 		if(iswupper(word[ccnt])) word[ccnt]=towlower(word[ccnt]);
@@ -92,7 +92,7 @@ bool WordCheck(wchar_t *word)
 	int wordlen;
 	int ccnt;
 
-	wordlen=wcslen(word);
+	wordlen=(int)wcslen(word);
 
 	if(wordlen < 1) return false;
 	if( !iswalpha(word[0]) ) return false;

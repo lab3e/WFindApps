@@ -475,7 +475,7 @@ std::wstring CRepeatFinder::ErrorMessage(int code)
 	case ERR_BAD_DOCX_FILE: return L"This .docx file can't be read.";
 	case ERR_BAD_PDF_FILE: return L"This .pdf file can't be read. (PDF reading needs pdftotext.exe in the same folder as WRepeatfind.exe.)";
 	case ERR_CANNOT_FIND_URL_LINK: return L"The web link could not be found.";
-	case ERR_CANNOT_OPEN_INPUT_FILE: return L"The file can't be opened, perhaps because another program has it open.";
+	case ERR_CANNOT_OPEN_INPUT_FILE: return L"The file can't be opened. It may be damaged, or another program may have it open.";
 	default: return L"Error " + std::to_wstring(code) + L" occurred.";
 	}
 }

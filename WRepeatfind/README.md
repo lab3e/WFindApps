@@ -31,4 +31,4 @@ For each later word, every earlier occurrence is tried and the longest match win
 - `RepeatReport.cpp` — writes the HTML report
 - `MainDlg`, `PasteDlg`, `OptionsDlg` — the window and its two dialogs
 - `WRepeatfind.cpp` — application start-up, settings, command line, opening the report
-- `DialogLayout.h` — keeps controls anchored as the window is resized
+- `..\Common\DialogLayout.h` — keeps controls anchored as the window is resized (shared with WCopyfind)

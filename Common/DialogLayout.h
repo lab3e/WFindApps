@@ -1,4 +1,8 @@
-// DialogLayout.h : keeps dialog controls anchored to the window edges as a resizable dialog changes size
+// DialogLayout.h : keeps dialog controls anchored as a resizable dialog changes size
+//
+// Each control is given the percentage (0-100) of the dialog's growth in width and height that it moves
+// by and that it grows by. For example, a list that should take 30% of any extra height is added with
+// sizeY = 30, and every control below it with moveY = 30.
 
 #pragma once
 #include <vector>
@@ -6,7 +10,6 @@
 class CDialogLayout
 {
 public:
-	// fractions (0-100) of the width/height change applied to a control's position and size
 	enum Anchor
 	{
 		TopLeft,			// doesn't move
@@ -31,12 +34,26 @@ public:
 
 	void Add(int id, Anchor anchor)
 	{
+		switch(anchor)
+		{
+		case TopLeft: Add(id, 0, 0, 0, 0); break;
+		case TopRight: Add(id, 100, 0, 0, 0); break;
+		case BottomLeft: Add(id, 0, 100, 0, 0); break;
+		case BottomRight: Add(id, 100, 100, 0, 0); break;
+		case StretchX: Add(id, 0, 0, 100, 0); break;
+		case StretchXBottom: Add(id, 0, 100, 100, 0); break;
+		case StretchXY: Add(id, 0, 0, 100, 100); break;
+		}
+	}
+
+	void Add(int id, int moveX, int moveY, int sizeX, int sizeY)
+	{
 		CWnd* control = m_pDialog->GetDlgItem(id);
 		if(control == nullptr) return;
 		CRect rect;
 		control->GetWindowRect(&rect);
 		m_pDialog->ScreenToClient(&rect);
-		m_Items.push_back({id, anchor, rect});
+		m_Items.push_back({id, moveX, moveY, sizeX, sizeY, rect});
 	}
 
 	void Resize()
@@ -53,16 +70,9 @@ public:
 		for(const Item& item : m_Items)
 		{
 			CRect r = item.Rect;
-			switch(item.Anchor)
-			{
-			case TopLeft: break;
-			case TopRight: r.OffsetRect(dx, 0); break;
-			case BottomLeft: r.OffsetRect(0, dy); break;
-			case BottomRight: r.OffsetRect(dx, dy); break;
-			case StretchX: r.right += dx; break;
-			case StretchXBottom: r.right += dx; r.OffsetRect(0, dy); break;
-			case StretchXY: r.right += dx; r.bottom += dy; break;
-			}
+			r.OffsetRect(dx * item.MoveX / 100, dy * item.MoveY / 100);
+			r.right += dx * item.SizeX / 100;
+			r.bottom += dy * item.SizeY / 100;
 			CWnd* control = m_pDialog->GetDlgItem(item.Id);
 			if(control != nullptr && hdwp != nullptr)
 				hdwp = DeferWindowPos(hdwp, control->GetSafeHwnd(), nullptr, r.left, r.top, r.Width(), r.Height(), SWP_NOZORDER | SWP_NOACTIVATE);
@@ -75,7 +85,7 @@ public:
 	bool IsReady() const { return m_pDialog != nullptr; }
 
 private:
-	struct Item { int Id; Anchor Anchor; CRect Rect; };
+	struct Item { int Id; int MoveX, MoveY, SizeX, SizeY; CRect Rect; };
 	CWnd* m_pDialog = nullptr;
 	CSize m_Original;
 	CSize m_MinTrack;

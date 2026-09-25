@@ -1,0 +1,4 @@
+# The Plagiarism Resource Site has moved to https://wcopyfind.wfindapps.org/ and https://wfindapps.org/
+# Every page redirects (301) to its new home; search engines are welcome to follow them.
+User-agent: *
+Allow: /

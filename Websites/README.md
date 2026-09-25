@@ -75,4 +75,6 @@ Upload the contents of each `dist/<host name>/` folder to that site's document r
 | `/privacy-policy/` | `https://wfindapps.org/privacy.html` |
 | `/sample-page/`, `/copyright/`, `/terms-and-conditions/` | `https://wfindapps.org/about.html` |
 
+Put `old-site/robots.txt` in the old site's folder too: without a real `robots.txt`, the catch-all redirect would send search engines a web page where they expect crawling rules.
+
 Real files are still served, so the old download files (`/WCopyfind.4.1.5.exe.zip` and so on) stay where they are: the new WCopyfind download page links to them for older versions. WordPress's login and admin pages keep working.

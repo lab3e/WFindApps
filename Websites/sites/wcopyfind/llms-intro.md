@@ -10,3 +10,4 @@ Key facts:
 - Reads .docx, .doc, .txt, .htm/.html, text-based .pdf (best with the free pdftotext.exe beside it), and .url internet shortcuts. Works with languages that separate words with spaces.
 - Free for any purpose; GNU General Public License version 3 or later; source code at {{github}}. Runs on 64-bit Windows 10 and 11 with no installation; Mac and Linux users can use Wine.
 - Companion program: WRepeatfind ({{wrf}}/) finds repetition within a single document.
+- Contact: bug reports and suggestions at {{issues}}; the author, Louis A. Bloomfield (Professor Emeritus of Physics, University of Virginia), at {{email}}. More at {{hub}}/contact.html.

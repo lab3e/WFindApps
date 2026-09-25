@@ -11,3 +11,4 @@ Key facts:
 - Read .docx, .doc, .txt, .htm/.html, and text-based .pdf files (PDF reading works best with the free pdftotext.exe from the Xpdf tools). Work with any language that separates words with spaces.
 - Results are reports that open in a web browser, with matching passages highlighted.
 - The programs do not search the internet; they compare the documents the user provides.
+- Contact: the author, Louis A. Bloomfield (Professor Emeritus of Physics, University of Virginia), at {{email}} or {{postal_text}}. Bug reports and feature requests: {{issues}}.

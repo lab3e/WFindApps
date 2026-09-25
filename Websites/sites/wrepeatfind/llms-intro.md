@@ -9,3 +9,4 @@ Key facts:
 - Reads .docx, .doc, .txt, .htm/.html, and text-based .pdf, or pasted text. Works with languages that separate words with spaces.
 - Differs from grammar checkers, which examine one sentence at a time. Companion program WCopyfind ({{wcf}}/) compares different documents with each other.
 - Free for any purpose; GNU General Public License version 3 or later; source code at {{github}}. Runs on 64-bit Windows 10 and 11 with no installation. Has a command-line mode.
+- Contact: bug reports and suggestions at {{issues}}; the author, Louis A. Bloomfield (Professor Emeritus of Physics, University of Virginia), at {{email}}. More at {{hub}}/contact.html.

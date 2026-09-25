@@ -4,6 +4,8 @@ WRepeatfind finds repeated phrases within a single document, or within a book ma
 
 It uses the same fast comparison approach as WCopyfind and shares its document-reading code (`..\Common`), so it reads the same file types: `.docx`, `.doc`, `.txt`, `.pdf` (with `pdftotext.exe` beside `WRepeatfind.exe`), and `.htm`/`.html`. Text can also be pasted in directly.
 
+Web site: https://WRepeatfind.WFindApps.org · Problems and suggestions: https://github.com/lab3e/WFindApps/issues · Author: Lou Bloomfield, lab3e@virginia.edu
+
 ## What's new in 1.0.1
 - `.doc` files are read with Windows' IFilter reader as intended; in 1.0.0 it could not load, so they fell back to the rougher byte scanner
 - An About box (in the window's system menu) with a link to https://WRepeatfind.WFindApps.org

@@ -2,7 +2,7 @@
 
 WCopyfind is a C++/MFC program for Windows that compares collections of documents to discover if they share phrases. It is used for detecting plagiarism and for finding common passages across large sets of text files.
 
-Web site: https://WCopyfind.WFindApps.org
+Web site: https://WCopyfind.WFindApps.org · Problems and suggestions: https://github.com/lab3e/WFindApps/issues · Author: Lou Bloomfield, lab3e@virginia.edu
 
 ## What's new in 6.0.2
 - A new program icon: two pages with the same highlighted phrase, linked, in place of the generic icon WCopyfind had used since it was first written

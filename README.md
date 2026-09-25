@@ -18,6 +18,11 @@ Each release is marked with a git tag: `WCopyfind-4.1.5` (the original source, b
 ## Building
 Open `WCopyfind.sln` in Visual Studio 2022 or later with the **Desktop development with C++** workload and the **MFC** optional component installed, and build the Release x64 configuration. Each program builds into its own `x64\Release` folder.
 
+## Contact
+- Web sites: https://WFindApps.org, https://WCopyfind.WFindApps.org, https://WRepeatfind.WFindApps.org
+- Bug reports and feature requests: [GitHub Issues](https://github.com/lab3e/WFindApps/issues)
+- The author, Lou Bloomfield: lab3e@virginia.edu, or Louis Bloomfield, Department of Physics, Box 400714, Charlottesville, VA 22904-4714
+
 ## License
 Copyright (C) 2026 Louis A. Bloomfield
 

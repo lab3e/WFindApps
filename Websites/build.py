@@ -25,6 +25,11 @@ TODAY = datetime.date.today().isoformat()
 AUTHOR = 'Louis A. Bloomfield'
 PERSON = {'@type': 'Person', 'name': AUTHOR, 'jobTitle': 'Professor Emeritus of Physics',
           'affiliation': {'@type': 'CollegeOrUniversity', 'name': 'University of Virginia'}}
+EMAIL = 'lab3e@virginia.edu'
+POSTAL = ['Louis Bloomfield', 'Department of Physics', 'Box 400714', 'Charlottesville, VA 22904-4714']
+PERSON['email'] = EMAIL
+PERSON['address'] = {'@type': 'PostalAddress', 'streetAddress': 'Department of Physics, Box 400714', 'addressLocality': 'Charlottesville',
+                     'addressRegion': 'VA', 'postalCode': '22904-4714', 'addressCountry': 'US'}
 GITHUB = 'https://github.com/lab3e/WFindApps'
 ISSUES = GITHUB + '/issues'
 
@@ -60,7 +65,9 @@ WREPEATFIND_ZIP = f'WRepeatfind-{WREPEATFIND_VERSION}-win-x64.zip'
 
 VALUES = {
     'hub': 'https://wfindapps.org', 'wcf': 'https://wcopyfind.wfindapps.org', 'wrf': 'https://wrepeatfind.wfindapps.org',
-    'github': GITHUB, 'issues': ISSUES, 'license': GITHUB + '/blob/main/LICENSE', 'author': AUTHOR, 'year': str(datetime.date.today().year),
+    'github': GITHUB, 'issues': ISSUES, 'email': EMAIL, 'email_link': f'<a href="mailto:{EMAIL}">{EMAIL}</a>',
+    'postal': '<address>' + '<br>'.join(POSTAL) + '</address>', 'postal_text': ', '.join(POSTAL),
+    'license': GITHUB + '/blob/main/LICENSE', 'author': AUTHOR, 'year': str(datetime.date.today().year),
     'wcopyfind_version': WCOPYFIND_VERSION, 'wcopyfind_zip': WCOPYFIND_ZIP, 'wcopyfind_size': '1.4 MB',
     'wcopyfind_download': f'{GITHUB}/releases/download/WCopyfind-{WCOPYFIND_VERSION}/{WCOPYFIND_ZIP}',
     'wcopyfind_release': f'{GITHUB}/releases/tag/WCopyfind-{WCOPYFIND_VERSION}',
@@ -149,7 +156,8 @@ def page_html(site_key, page, meta, body):
     if page == 'index.html':
         if site_key == 'wfindapps':
             graph.append({'@type': 'Organization', 'name': 'WFindApps', 'url': base + '/', 'logo': base + '/img/logo.png',
-                          'founder': PERSON, 'sameAs': [GITHUB]})
+                          'founder': PERSON, 'sameAs': [GITHUB],
+                          'contactPoint': {'@type': 'ContactPoint', 'contactType': 'customer support', 'email': EMAIL, 'url': base + '/contact.html'}})
             graph.append({'@type': 'WebSite', 'name': 'WFindApps', 'url': base + '/', 'description': description})
             graph.append(software_json('wcopyfind'))
             graph.append(software_json('wrepeatfind'))
@@ -315,6 +323,11 @@ def build_site(site_key):
     if os.path.isdir(site_img):
         shutil.copytree(site_img, os.path.join(out, 'img'), dirs_exist_ok=True)
     shutil.copy(os.path.join(src, 'favicon.ico'), os.path.join(out, 'favicon.ico'))
+
+    # the site's own downloads (such as older versions of the program), then the sample documents
+    site_downloads = os.path.join(src, 'downloads')
+    if os.path.isdir(site_downloads):
+        shutil.copytree(site_downloads, os.path.join(out, 'downloads'), dirs_exist_ok=True)
 
     # sample documents to download
     samples = os.path.join(ROOT, 'samples', site_key)
